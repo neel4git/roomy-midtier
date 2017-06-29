@@ -1,0 +1,1 @@
+INSERT INTO Customer(customer_id,customer_name, customer_password) VALUES ('RM1234','chaitanya','chaitanya' );
