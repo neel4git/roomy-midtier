@@ -1,4 +1,4 @@
-package com.Rommy;
+package com.Roomy;
 
 import org.h2.server.web.WebServlet;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;

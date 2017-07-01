@@ -1,4 +1,4 @@
-package com.Rommy;
+package com.Roomy;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.Rommy.Service;
+package com.Roomy.Util;
 
 import java.util.Properties;
 
@@ -10,19 +10,13 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/sendmail")
-public class MailService {
-	/*@Autowired
-	MemberRepository memberRepository;*/
+@Component
+public class MailUtil {
 
-	@RequestMapping(method = RequestMethod.GET)
-	public String getMemberDetailsByPsaId(
+	public String generateCustomeWelcomeMail(
 			@RequestParam(value = "to") String to,
 			@RequestParam(value = "subject") String subject,
 			@RequestParam(value = "mailBody") String mailBody) {
@@ -36,7 +30,9 @@ public class MailService {
 		props.put("mail.smtp.host", "smtp.gmail.com");
 		props.put("mail.smtp.port", "587");
 
-		Session session = Session.getInstance(props,new javax.mail.Authenticator() {protected PasswordAuthentication getPasswordAuthentication() {
+		Session session = Session.getInstance(props,
+				new javax.mail.Authenticator() {
+					protected PasswordAuthentication getPasswordAuthentication() {
 						return new PasswordAuthentication(username, password);
 					}
 				});
@@ -44,7 +40,8 @@ public class MailService {
 		try {
 
 			Message message = new MimeMessage(session);
-			message.setFrom(new InternetAddress("muralidharan.dharan9@gmail.com"));
+			message.setFrom(new InternetAddress(
+					"muralidharan.dharan9@gmail.com"));
 			message.setRecipients(Message.RecipientType.TO,
 					InternetAddress.parse(to));
 			message.setSubject(subject);
