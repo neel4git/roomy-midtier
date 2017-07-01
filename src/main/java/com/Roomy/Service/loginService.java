@@ -26,7 +26,7 @@ public class loginService {
 	MailUtil mailUtil;
 
 	@RequestMapping(value = "/getCustomerDetails", method = RequestMethod.GET)
-	public CustomerMaster getCustomerDetails(
+	public Object getCustomerDetails(
 			@RequestParam(value = "userName", required = true) String userName,
 			@RequestParam(value = "userPassword", required = true) String userPassword)
 			throws Exception {
@@ -35,6 +35,11 @@ public class loginService {
 			userPassword = aESEncryptionUtil.encrypt(userPassword);
 			customerMaster = (CustomerMaster) customerRepository
 					.getCustomerDetails(userName, userPassword);
+			if (customerMaster == null) {
+				metaData.setCode("400");
+				metaData.setFailureMessage("CustomerNot Found");
+				return metaData;
+			}
 
 		} catch (Exception e) {
 			throw new Exception("CustomeDetailsNOt found");
@@ -63,8 +68,10 @@ public class loginService {
 		}
 		if (customerDeatils != null) {
 			// send the Welcome Mail back to User
-			/*mailUtil.generateCustomeWelcomeMail(customerDeatils.getEmail_Id(),
-					"Welcome To Roomy", "WelcomeMail");*/
+			/*
+			 * mailUtil.generateCustomeWelcomeMail(customerDeatils.getEmail_Id(),
+			 * "Welcome To Roomy", "WelcomeMail");
+			 */
 			metaData.setCode("200");
 			metaData.setFailureMessage("Record Sucessfully saved");
 
