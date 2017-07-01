@@ -63,8 +63,8 @@ public class loginService {
 		}
 		if (customerDeatils != null) {
 			// send the Welcome Mail back to User
-			mailUtil.generateCustomeWelcomeMail(customerDeatils.getEmail_Id(),
-					"Welcome To Roomy", "WelcomeMail");
+			/*mailUtil.generateCustomeWelcomeMail(customerDeatils.getEmail_Id(),
+					"Welcome To Roomy", "WelcomeMail");*/
 			metaData.setCode("200");
 			metaData.setFailureMessage("Record Sucessfully saved");
 
