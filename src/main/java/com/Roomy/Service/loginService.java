@@ -28,9 +28,18 @@ public class loginService {
 	@RequestMapping(value = "/getCustomerDetails", method = RequestMethod.GET)
 	public CustomerMaster getCustomerDetails(
 			@RequestParam(value = "userName", required = true) String userName,
-			@RequestParam(value = "userPassword", required = true) String userPassword) {
-		CustomerMaster customerMaster = (CustomerMaster) customerRepository
-				.getCustomerDetails(userName, userPassword);
+			@RequestParam(value = "userPassword", required = true) String userPassword)
+			throws Exception {
+		CustomerMaster customerMaster = null;
+		try {
+			userPassword = aESEncryptionUtil.encrypt(userPassword);
+			customerMaster = (CustomerMaster) customerRepository
+					.getCustomerDetails(userName, userPassword);
+
+		} catch (Exception e) {
+			throw new Exception("CustomeDetailsNOt found");
+
+		}
 		return customerMaster;
 
 	}
