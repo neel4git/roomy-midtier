@@ -5,17 +5,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class MetaData {
 
-	private String code;
 	private String responseMessage;
 	private String failureMessage;
-
-	public String getCode() {
-		return code;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
+	private int otp;
+	private String customerToken;
 
 	public String getResponseMessage() {
 		return responseMessage;
@@ -31,6 +24,22 @@ public class MetaData {
 
 	public void setFailureMessage(String failureMessage) {
 		this.failureMessage = failureMessage;
+	}
+
+	public int getOtp() {
+		return otp;
+	}
+
+	public void setOtp(int otp) {
+		this.otp = otp;
+	}
+
+	public String getCustomerToken() {
+		return customerToken;
+	}
+
+	public void setCustomerToken(String customerToken) {
+		this.customerToken = customerToken;
 	}
 
 }

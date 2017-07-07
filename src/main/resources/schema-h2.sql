@@ -1,17 +1,16 @@
-CREATE TABLE Customer_Master
-( customer_id  varchar2(50),
-  customer_name varchar2(50) NOT NULL,
-  customer_password varchar2(50)NOT NULL,
-  SSO   varchar2(50),
-  First_Name varchar2(50) ,
-  Middle_Name varchar2(50),
-  Last_Name varchar2(50) ,
-  Mobile_Number varchar2(50) ,
-  Email_Id varchar2(50) ,
-  ID_card_Type varchar2(50) ,
-  ID_card_Number varchar2(50) ,
-  City varchar2(50) ,
-  Country varchar2(50) ,   
-  User_Photo varchar2(30000),  
-  CONSTRAINT customers_pk PRIMARY KEY (customer_id)
+CREATE TABLE User_Master
+( userid  varchar2(50),
+  emailaddress varchar2(50),
+  contactnumber varchar2(50),
+  firstname varchar2(50),
+  middlename varchar2(50),
+  lastname varchar2(50),
+  usertype varchar2(10),
+  loginpassword varchar2(50),
+  createdon varchar2(10),
+  passwordchangedOn varchar2(10),  
+  CONSTRAINT customers_pk PRIMARY KEY (UserId),
+  CONSTRAINT USER_EmailAddress UNIQUE(EmailAddress,ContactNumber)
 );
+
+

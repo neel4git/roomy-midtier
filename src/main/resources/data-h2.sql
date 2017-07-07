@@ -1,15 +1,11 @@
-INSERT INTO Customer_Master(customer_id,customer_name, customer_password, First_Name,Mobile_Number,City) VALUES ('RM1001','RM1','W6VWBQBrJIrNJgy0Eus63A==','Roomy User 1','1234567890','hyd');
-INSERT INTO Customer_Master(customer_id,customer_name, customer_password,First_Name,Mobile_Number,City) VALUES ('RM1002','RM2','O4+PnMMzN7mjlUlz6qGFnA==','Roomy USer2','1234567890','hyd' );
-INSERT INTO Customer_Master(customer_id,customer_name, customer_password,First_Name,Mobile_Number,City) VALUES ('RM1003','RM3','KjdatY9GnjR69FRV8JftUQ==','Roomy User3','1234567890','hyd' );
-INSERT INTO Customer_Master(customer_id,customer_name, customer_password,First_Name,Mobile_Number,City) VALUES ('RM1004','RM4','BGJadQxpRxBzZpWkfg0/6A==','Roomy User 4','1234567890','hyd' );
-INSERT INTO Customer_Master(customer_id,customer_name, customer_password,First_Name,Mobile_Number,City) VALUES ('RM1005','RM5','vm2efuh/EoHDvYWTn+coQg==' ,'Roomy User 5','1234567890','hyd' );
+INSERT INTO User_Master(userid,emailaddress, contactnumber, firstname,middlename,lastname,usertype,loginpassword,createdon,passwordchangedon)
+VALUES ('RM1001','RM1001@gmail.com','8019066838','RM1001','RM1','RM1','Normal','M0h7GHp287CWNRBYMdC08w==','2017-07-01','2017-07-01');
 
+INSERT INTO User_Master(userid,emailaddress, contactnumber, firstname,middlename,lastname,usertype,loginpassword,createdon,passwordchangedon)
+VALUES ('RM1002','RM1002@gmail.com','8019066838','RM1002','RM2','RM2','Normal','tsm9Oicxd1MzPclArQmyuA==','2017-07-01','2017-07-01');
 
+INSERT INTO User_Master(userid,emailaddress, contactnumber, firstname,middlename,lastname,usertype,loginpassword,createdon,passwordchangedon)
+VALUES ('RM1003','RM1003@gmail.com','8019066838','RM1003','RM3','RM3','Normal','0RowwHPmQIytprUBzTUZiw==','2017-07-01','2017-07-01');
 
-
-
-
-
-
-
-
+INSERT INTO User_Master(userid,emailaddress, contactnumber, firstname,middlename,lastname,usertype,loginpassword,createdon,passwordchangedon)
+VALUES ('RM1004','RM1004@gmail.com','8019066838','RM1004','RM4','RM4','Normal','bhKrW4FDRgIeQ9DmWJUB/A==','2017-07-01','2017-07-01');
