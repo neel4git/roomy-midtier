@@ -93,7 +93,7 @@ public class UserRegistrationService {
 		return metaData;
 	}
 
-	@RequestMapping(value = "/authenticateUser", method = RequestMethod.POST)
+	@RequestMapping(value = "/authenticateUser", method = RequestMethod.GET)
 	public MetaData authenticateUser(
 			@RequestParam(value = "otp", required = true) String otp,
 			@RequestHeader(value = "customerToken") String customertToken) {
