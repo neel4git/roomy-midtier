@@ -44,6 +44,17 @@ public class UserMaster implements Serializable {
 	@Column(name = "passwordchangedon", nullable = true)
 	private String passwordChangedOn;
 
+	@Transient
+	private String customerToken;
+
+	public String getCustomerToken() {
+		return customerToken;
+	}
+
+	public void setCustomerToken(String customerToken) {
+		this.customerToken = customerToken;
+	}
+
 	public String getUserId() {
 		return userId;
 	}
@@ -124,4 +135,4 @@ public class UserMaster implements Serializable {
 		this.passwordChangedOn = passwordChangedOn;
 	}
 
-	}
+}

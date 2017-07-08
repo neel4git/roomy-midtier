@@ -9,14 +9,15 @@ import java.util.Date;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Roomy.Repository.UserRepository;
-import com.Roomy.Response.DTO.MetaData;
+import com.Roomy.Request.Domain.AutheticateUserRequest;
+import com.Roomy.Request.Domain.LoginRequest;
+import com.Roomy.Response.Domain.LoginResponse;
+import com.Roomy.Response.Domain.MetaData;
 import com.Roomy.Util.AESEncryptionUtil;
 import com.Roomy.Util.JwtKeyUtil;
 import com.Roomy.Util.RoomyUtil;
@@ -41,32 +42,8 @@ public class UserRegistrationService {
 	private final static Logger LOGGER = Logger
 			.getLogger(UserRegistrationService.class.getName());
 
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public Object getCustomerDetails(
-			@RequestParam(value = "userName", required = true) String userName,
-			@RequestParam(value = "userPassword", required = true) String userPassword)
-			throws Exception {
-		LOGGER.info("Entered into Login Service to get the user Names as "
-				+ userName);
-		UserMaster userMaster = null;
-		try {
-			userPassword = aESEncryptionUtil.encrypt(userPassword);
-			userMaster = (UserMaster) userRepository.getUserDetails(userName,
-					userPassword);
-			if (userMaster == null) {
-				metaData.setFailureMessage("No userFound with these details");
-				return metaData;
-			}
-		} catch (Exception e) {
-			LOGGER.error("Some Exception occurred in processing", e);
-			throw new Exception("CustomeDetailsNOt found");
-		}
-		return userMaster;
-
-	}
-
 	@RequestMapping(value = "/registerUser", method = RequestMethod.POST)
-	public MetaData getMemberDetailsByPsaId(@RequestBody UserMaster userMaster) {
+	public MetaData registerUser(@RequestBody UserMaster userMaster) {
 		LOGGER.info("Entered into registerUser Service ");
 		int OTPAuth = 0;
 		MetaData metaData = new MetaData();
@@ -93,36 +70,40 @@ public class UserRegistrationService {
 		return metaData;
 	}
 
-	@RequestMapping(value = "/authenticateUser", method = RequestMethod.GET)
+	@RequestMapping(value = "/authenticateUser", method = RequestMethod.POST)
 	public MetaData authenticateUser(
-			@RequestParam(value = "otp", required = true) String otp,
-			@RequestHeader(value = "customerToken") String customertToken) {
+			@RequestBody AutheticateUserRequest autheticateUserRequest) {
 		LOGGER.info("Entered into authenticateUser Service ");
 		try {
-			SourceKeyRing sourceKeyRing = decryptyToken(customertToken);
+			SourceKeyRing sourceKeyRing = decryptyToken(autheticateUserRequest
+					.getCustomerToken());
 			MetaData metaData = new MetaData();
 			// if otp didnot matched
-			if (otp.equals(sourceKeyRing.getOtp())) {
+			if (autheticateUserRequest.getOtp().equals(sourceKeyRing.getOtp())) {
 				metaData.setFailureMessage("OTP erntered is wrong please enter the valid otp");
-				metaData.setCustomerToken(customertToken);
+				metaData.setCustomerToken(autheticateUserRequest
+						.getCustomerToken());
 				return metaData;
 			}
 			// if OTP issued time is excceded greater than 15 minutes
 			else if (RoomyUtil.getOtpIssueTimeDiffrence(sourceKeyRing
 					.getOtpIssuedTime()) > 15) {
 				metaData.setResponseMessage("Token entered is Expired Please Reegister again");
-				metaData.setCustomerToken(customertToken);
+				metaData.setCustomerToken(autheticateUserRequest
+						.getCustomerToken());
 				return metaData;
 			} else {
 				UserMaster userMaster = userRepository.save(sourceKeyRing
 						.getUserMaster());
 				if (userMaster != null) {
 					metaData.setResponseMessage("User Registered Sucessfully");
-					metaData.setCustomerToken(customertToken);
+					metaData.setCustomerToken(autheticateUserRequest
+							.getCustomerToken());
 					return metaData;
 				} else {
 					metaData.setFailureMessage("User Already Registered Please login");
-					metaData.setCustomerToken(customertToken);
+					metaData.setCustomerToken(autheticateUserRequest
+							.getCustomerToken());
 					return metaData;
 				}
 
@@ -132,10 +113,64 @@ public class UserRegistrationService {
 					"Some Exception occurred in processing the authenticateUser Service",
 					exception);
 			metaData.setFailureMessage("Some Exception Occurred Please contact Admin");
-			metaData.setCustomerToken(customertToken);
+			metaData.setCustomerToken(autheticateUserRequest.getCustomerToken());
 			return metaData;
 
 		}
+	}
+
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	public LoginResponse getCustomerDetails(
+			@RequestBody LoginRequest loginRequest) {
+		LOGGER.info("Entered into Login Service  withe the emnail ID"
+				+ loginRequest.getEmailId());
+		UserMaster userMaster = null;
+		String userPassword;
+		LoginResponse loginResponse = new LoginResponse();
+		try {
+			userPassword = aESEncryptionUtil
+					.encrypt(loginRequest.getPassword());
+			// User is trying to LOgin with EmailID
+			if (loginRequest.getEmailId() != null) {
+				userMaster = (UserMaster) userRepository
+						.getUserDetailsByEmailID(loginRequest.getEmailId(),
+								userPassword);
+			}
+			// User is Trying to Login with Mobile
+			else if (loginRequest.getMobileNumber() != null) {
+				userMaster = (UserMaster) userRepository
+						.getUserDetailsByMobileNumber(
+								loginRequest.getMobileNumber(), userPassword);
+			}
+
+			if (userMaster != null) {
+				// Record Found In Database
+				loginResponse.setResponseData("Authenticated User");
+				loginResponse.setUserId(userMaster.getUserId());
+				loginResponse.setEmailAddress(userMaster.getEmailAddress());
+				loginResponse.setContactNumber(userMaster.getContactNumber());
+				loginResponse.setFirstName(userMaster.getFirstName());
+				loginResponse.setMiddleName(userMaster.getMiddleName());
+				loginResponse.setLastName(userMaster.getLastName());
+				loginResponse.setUserType(userMaster.getUserType());
+				loginResponse.setCustomerToken(generateCustomerToken(
+						userMaster, 0));
+
+			} else {
+				// Record not found
+				loginResponse
+						.setResponseData("No records Found with Roomy Please register");
+
+			}
+
+		} catch (Exception e) {
+			LOGGER.error("Some Exception occurred in processing", e);
+			loginResponse
+					.setResponseData("Some Exception Occurred while fetching the Detials");
+
+		}
+		return loginResponse;
+
 	}
 
 	private String generateCustomerToken(UserMaster userMaster, int OTPAuth)

@@ -1,4 +1,4 @@
-package com.Roomy.Response.DTO;
+package com.Roomy.Response.Domain;
 
 import org.springframework.stereotype.Component;
 
