@@ -131,13 +131,14 @@ public class UserRegistrationService {
 			userPassword = aESEncryptionUtil
 					.encrypt(loginRequest.getPassword());
 			// User is trying to LOgin with EmailID
-			if (loginRequest.getEmailId() != null) {
+			if (loginRequest.getEmailId() != null
+					&& loginRequest.getEmailId().trim().length() > 0) {
 				userMaster = (UserMaster) userRepository
 						.getUserDetailsByEmailID(loginRequest.getEmailId(),
 								userPassword);
 			}
 			// User is Trying to Login with Mobile
-			else if (loginRequest.getMobileNumber() != null) {
+			else {
 				userMaster = (UserMaster) userRepository
 						.getUserDetailsByMobileNumber(
 								loginRequest.getMobileNumber(), userPassword);
