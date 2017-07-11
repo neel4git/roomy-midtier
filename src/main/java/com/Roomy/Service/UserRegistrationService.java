@@ -52,7 +52,7 @@ public class UserRegistrationService {
 					.getLoginPassword()));
 			OTPAuth = RoomyUtil.generateOTP();
 			LOGGER.info("OTP generated for the given customer is " + OTPAuth
-					+ "for the user " + userMaster.getUserId());
+					+ "for the user ");
 			metaData.setOtp(OTPAuth);
 			metaData.setCustomerToken(generateCustomerToken(userMaster, OTPAuth));
 		} catch (JOSEException jOSEException) {
@@ -147,7 +147,6 @@ public class UserRegistrationService {
 			if (userMaster != null) {
 				// Record Found In Database
 				loginResponse.setResponseData("Authenticated User");
-				loginResponse.setUserId(userMaster.getUserId());
 				loginResponse.setEmailAddress(userMaster.getEmailAddress());
 				loginResponse.setContactNumber(userMaster.getContactNumber());
 				loginResponse.setFirstName(userMaster.getFirstName());
@@ -179,11 +178,12 @@ public class UserRegistrationService {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		// Set the SourceKeyRing vale to generate the Key
-		SourceKeyRing kerRing = new SourceKeyRing();
-		kerRing.setUserMaster(userMaster);
-		kerRing.setOtp(OTPAuth);
-		kerRing.setOtpIssuedTime(dateFormat.format(date));
-		return JwtKeyUtil.createJWT(kerRing);
+		SourceKeyRing keyRing = new SourceKeyRing();
+		UserMaster userMasterSourceKeyRing = userMaster;
+		keyRing.setUserMaster(userMasterSourceKeyRing);
+		keyRing.setOtp(OTPAuth);
+		keyRing.setOtpIssuedTime(dateFormat.format(date));
+		return JwtKeyUtil.createJWT(keyRing);
 	}
 
 	private SourceKeyRing decryptyToken(String token) throws ParseException,

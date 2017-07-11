@@ -11,10 +11,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
-@EnableWebMvc
 public class SwaggerCrosFilter implements Filter {
 
 	@Override
@@ -24,8 +22,7 @@ public class SwaggerCrosFilter implements Filter {
 		reponse.setHeader("Acess-Control-Allow-Origin", "*");
 		reponse.setHeader("Acess-Control-Allow-Methods", "GET,POST,PUT,DELETE");
 		reponse.setHeader("Acess-Control-Max-Age", "3600");
-		reponse.setHeader("Acess-Control-Allow-Headers",
-				"x-requested-with,Content-Type");
+		reponse.setHeader("Acess-Control-Allow-Headers","x-requested-with,Content-Type");
 		reponse.setHeader("Cache-Control", "no-cache,no-store,must-revalidate");
 		reponse.setHeader("Pragma", "np-cache");
 		reponse.setHeader("Expires", "0");

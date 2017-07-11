@@ -1,11 +1,16 @@
 package com.Roomy.domain;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Transient;
+
+import org.hibernate.annotations.Nationalized;
 
 @Entity(name = "User_Master")
 public class UserMaster implements Serializable {
@@ -14,54 +19,31 @@ public class UserMaster implements Serializable {
 	private static final long serialVersionUID = -112950002831333869L;
 
 	@Id
-	@Column(name = "userid", unique = true)
-	private String userId;
+	@Column(name = "Id", unique = true)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int userId;
 
-	@Column(name = "emailaddress")
+	@Column(name = "Email_Address")
 	private String emailAddress;
 
-	@Column(name = "contactnumber")
+	@Column(name = "Contact_Number", length = 1, columnDefinition = "CHAR")
 	private String contactNumber;
 
-	@Column(name = "firstname", nullable = true)
+	@Column(name = "First_Name", nullable = true)
 	private String firstName;
 
-	@Column(name = "middlename", nullable = true)
+	@Column(name = "Middle_Name", nullable = true)
 	private String middleName;
 
-	@Column(name = "lastname", nullable = true)
+	@Column(name = "Last_Name", nullable = true)
 	private String lastName;
 
-	@Column(name = "usertype", nullable = true)
+	@Column(name = "User_Type", nullable = true)
 	private String userType;
 
-	@Column(name = "loginpassword", nullable = true)
+	@Nationalized
+	@Column(name = "Login_Password", nullable = true)
 	private String loginPassword;
-
-	@Column(name = "createdon", nullable = true)
-	private String createdOn;
-
-	@Column(name = "passwordchangedon", nullable = true)
-	private String passwordChangedOn;
-
-	@Transient
-	private String customerToken;
-
-	public String getCustomerToken() {
-		return customerToken;
-	}
-
-	public void setCustomerToken(String customerToken) {
-		this.customerToken = customerToken;
-	}
-
-	public String getUserId() {
-		return userId;
-	}
-
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
 
 	public String getEmailAddress() {
 		return emailAddress;
@@ -117,22 +99,6 @@ public class UserMaster implements Serializable {
 
 	public void setLoginPassword(String loginPassword) {
 		this.loginPassword = loginPassword;
-	}
-
-	public String getCreatedOn() {
-		return createdOn;
-	}
-
-	public void setCreatedOn(String createdOn) {
-		this.createdOn = createdOn;
-	}
-
-	public String getPasswordChangedOn() {
-		return passwordChangedOn;
-	}
-
-	public void setPasswordChangedOn(String passwordChangedOn) {
-		this.passwordChangedOn = passwordChangedOn;
 	}
 
 }
