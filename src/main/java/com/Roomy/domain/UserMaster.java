@@ -1,7 +1,6 @@
 package com.Roomy.domain;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,7 +38,7 @@ public class UserMaster implements Serializable {
 	private String lastName;
 
 	@Column(name = "User_Type", nullable = true)
-	private String userType;
+	private String userType="NonCorporate";
 
 	@Nationalized
 	@Column(name = "Login_Password", nullable = true)
