@@ -21,6 +21,7 @@ public class UserMaster implements Serializable {
 	@Column(name = "USERID", unique = true)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int userId;
+	
 
 	@Column(name = "Email_Address")
 	private String emailAddress;
