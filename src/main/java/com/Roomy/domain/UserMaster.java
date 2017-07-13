@@ -18,7 +18,7 @@ public class UserMaster implements Serializable {
 	private static final long serialVersionUID = -112950002831333869L;
 
 	@Id
-	@Column(name = "Id", unique = true)
+	@Column(name = "USERID", unique = true)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int userId;
 
@@ -38,7 +38,7 @@ public class UserMaster implements Serializable {
 	private String lastName;
 
 	@Column(name = "User_Type", nullable = true)
-	private String userType="NonCorporate";
+	private String userType = "NonCorporate";
 
 	@Nationalized
 	@Column(name = "Login_Password", nullable = true)
@@ -82,14 +82,6 @@ public class UserMaster implements Serializable {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
-	}
-
-	public String getUserType() {
-		return userType;
-	}
-
-	public void setUserType(String userType) {
-		this.userType = userType;
 	}
 
 	public String getLoginPassword() {
