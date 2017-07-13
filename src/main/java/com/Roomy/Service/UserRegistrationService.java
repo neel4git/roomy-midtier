@@ -66,7 +66,6 @@ public class UserRegistrationService {
 			metaData.setFailureMessage("Some Exception Occurted while generating the OTP Please contact ADmin");
 			return metaData;
 		}
-
 		return metaData;
 	}
 
