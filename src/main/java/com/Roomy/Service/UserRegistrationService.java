@@ -151,8 +151,7 @@ public class UserRegistrationService {
 				loginResponse.setContactNumber(userMaster.getContactNumber());
 				loginResponse.setFirstName(userMaster.getFirstName());
 				loginResponse.setMiddleName(userMaster.getMiddleName());
-				loginResponse.setLastName(userMaster.getLastName());
-				loginResponse.setUserType(userMaster.getUserType());
+				loginResponse.setLastName(userMaster.getLastName());				
 				loginResponse.setCustomerToken(generateCustomerToken(
 						userMaster, 0));
 
