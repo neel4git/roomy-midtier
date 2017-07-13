@@ -20,8 +20,7 @@ public class UserMaster implements Serializable {
 	@Id
 	@Column(name = "USERID", unique = true)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int userId;
-	
+	private int userId;	
 
 	@Column(name = "Email_Address")
 	private String emailAddress;
