@@ -28,7 +28,8 @@ public class HotelServices {
 
 	@RequestMapping(value = "/getListofHotelsByCity", method = RequestMethod.GET, produces = "application/json")
 	public Object getHotelsBasedonCity(
-			@RequestParam(value = "cityName", required = true) String cityName)
+			@RequestParam(value = "cityName", required = true) String cityName,
+			@RequestParam(value = "customerToken") String customerToken)
 			throws JsonProcessingException, JSONException {
 		LOGGER.info("Entered into getListofHotelsByCity for fetching the list of hotels by cityname as "
 				+ cityName);
