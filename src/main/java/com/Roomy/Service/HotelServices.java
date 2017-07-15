@@ -31,8 +31,7 @@ public class HotelServices {
 			@RequestParam(value = "cityName", required = true) String cityName,
 			@RequestParam(value = "customerToken") String customerToken)
 			throws JsonProcessingException, JSONException {
-		LOGGER.info("Entered into getListofHotelsByCity for fetching the list of hotels by cityname as "
-				+ cityName);
+		LOGGER.info("Hotel Serviec :: getListofHotels "+ cityName);
 		HotelsBasedOnCityResponse hotelsBasedOnCityResponse = null;
 		MetaDataHoteResponse metaDataHoteResponse = null;
 		List<HotelsBasedOnCityResponse> lisOfHotelDetails = new ArrayList<HotelsBasedOnCityResponse>();
