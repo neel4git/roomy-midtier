@@ -1,34 +1,24 @@
 package com.Roomy.Response.Domain;
 
 public class HotelsBasedOnCityResponse {
-	private int hotelID;
+
+	private int hotel_Id;
 	private String hotelName;
-	private String address1;
-	private String address2;
+	private String address;
 	private String city;
 	private String state;
-	private float minCost;
-	private float hourCost;
 	private double lattitue;
 	private double longitude;
-	private String category;
-	private String img;
+	private float minCost;
+	private float hourCost;
 	private String currencyType;
 
-	public int getHotelID() {
-		return hotelID;
+	public int getHotel_Id() {
+		return hotel_Id;
 	}
 
-	public void setHotelID(int hotelID) {
-		this.hotelID = hotelID;
-	}
-
-	public String getCurrencyType() {
-		return currencyType;
-	}
-
-	public void setCurrencyType(String currencyType) {
-		this.currencyType = currencyType;
+	public void setHotel_Id(int hotel_Id) {
+		this.hotel_Id = hotel_Id;
 	}
 
 	public String getHotelName() {
@@ -39,20 +29,12 @@ public class HotelsBasedOnCityResponse {
 		this.hotelName = hotelName;
 	}
 
-	public String getAddress1() {
-		return address1;
+	public String getAddress() {
+		return address;
 	}
 
-	public void setAddress1(String address1) {
-		this.address1 = address1;
-	}
-
-	public String getAddress2() {
-		return address2;
-	}
-
-	public void setAddress2(String address2) {
-		this.address2 = address2;
+	public void setAddress(String address) {
+		this.address = address;
 	}
 
 	public String getCity() {
@@ -71,12 +53,20 @@ public class HotelsBasedOnCityResponse {
 		this.state = state;
 	}
 
-	public String getCategory() {
-		return category;
+	public double getLattitue() {
+		return lattitue;
 	}
 
-	public void setCategory(String category) {
-		this.category = category;
+	public void setLattitue(double lattitue) {
+		this.lattitue = lattitue;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
 	}
 
 	public float getMinCost() {
@@ -95,28 +85,12 @@ public class HotelsBasedOnCityResponse {
 		this.hourCost = hourCost;
 	}
 
-	public String getImg() {
-		return img;
+	public String getCurrencyType() {
+		return currencyType;
 	}
 
-	public void setImg(String img) {
-		this.img = img;
-	}
-
-	public double getLattitue() {
-		return lattitue;
-	}
-
-	public void setLattitue(double lattitue) {
-		this.lattitue = lattitue;
-	}
-
-	public double getLongitude() {
-		return longitude;
-	}
-
-	public void setLongitude(double longitude) {
-		this.longitude = longitude;
+	public void setCurrencyType(String currencyType) {
+		this.currencyType = currencyType;
 	}
 
 }

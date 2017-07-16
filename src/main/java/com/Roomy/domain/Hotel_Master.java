@@ -9,6 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Transient;
 
 @Entity(name = "Hotel_Master")
@@ -17,6 +19,11 @@ public class Hotel_Master implements Serializable {
 	@Transient
 	private static final long serialVersionUID = -112950002831333869L;
 
+	@OneToOne
+	@PrimaryKeyJoinColumn
+	private Hotel_Info hotel_Info;
+	
+	
 	@Id
 	@Column(name = "Hotel_Id", unique = true)
 	private int hotel_Id;
