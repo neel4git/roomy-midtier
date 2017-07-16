@@ -1,10 +1,14 @@
 package com.Roomy.domain;
 
 import java.io.Serializable;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 
 @Entity(name = "Hotel_Master")
@@ -59,7 +63,17 @@ public class Hotel_Master implements Serializable {
 	@Column(name = "CONTACT_NUMBER_3")
 	private String contact_No3;
 
-	// Setters and getters
+	@OneToMany(mappedBy = "hotelMaster", cascade = CascadeType.ALL, targetEntity = Hotel_Pricing_Info.class, fetch = FetchType.EAGER)
+	private List<Hotel_Pricing_Info> pricinginfo;
+
+	public List<Hotel_Pricing_Info> getPricinginfo() {
+		return pricinginfo;
+	}
+
+	public void setPricinginfo(List<Hotel_Pricing_Info> pricinginfo) {
+		this.pricinginfo = pricinginfo;
+	}
+
 	public int getHotel_Id() {
 		return hotel_Id;
 	}

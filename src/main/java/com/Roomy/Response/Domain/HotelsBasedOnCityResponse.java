@@ -1,17 +1,26 @@
 package com.Roomy.Response.Domain;
 
-public class HotelsBasedOnCityResponse {	
+public class HotelsBasedOnCityResponse {
 	private String hotelName;
 	private String address1;
 	private String address2;
 	private String city;
 	private String state;
-	private String category;
-	private String minCost;
-	private String hourCost;
-	private String img;
+	private float minCost;
+	private float hourCost;
 	private double lattitue;
 	private double longitude;
+	private String category;
+	private String img;
+	private String currencyType;
+
+	public String getCurrencyType() {
+		return currencyType;
+	}
+
+	public void setCurrencyType(String currencyType) {
+		this.currencyType = currencyType;
+	}
 
 	public String getHotelName() {
 		return hotelName;
@@ -61,19 +70,19 @@ public class HotelsBasedOnCityResponse {
 		this.category = category;
 	}
 
-	public String getMinCost() {
+	public float getMinCost() {
 		return minCost;
 	}
 
-	public void setMinCost(String minCost) {
+	public void setMinCost(float minCost) {
 		this.minCost = minCost;
 	}
 
-	public String getHourCost() {
+	public float getHourCost() {
 		return hourCost;
 	}
 
-	public void setHourCost(String hourCost) {
+	public void setHourCost(float hourCost) {
 		this.hourCost = hourCost;
 	}
 
