@@ -1,6 +1,7 @@
 package com.Roomy.Response.Domain;
 
 public class HotelsBasedOnCityResponse {
+	private int hotelID;
 	private String hotelName;
 	private String address1;
 	private String address2;
@@ -13,6 +14,14 @@ public class HotelsBasedOnCityResponse {
 	private String category;
 	private String img;
 	private String currencyType;
+
+	public int getHotelID() {
+		return hotelID;
+	}
+
+	public void setHotelID(int hotelID) {
+		this.hotelID = hotelID;
+	}
 
 	public String getCurrencyType() {
 		return currencyType;

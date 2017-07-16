@@ -25,7 +25,7 @@ public class HotelServices {
 	@Autowired
 	Hotel_MasterRepository hotel_MasterRepository;
 
-	@RequestMapping(value = "/getListofHotelsByCity", method = RequestMethod.GET, produces = "application/json")
+	@RequestMapping(value = "/getHotels", method = RequestMethod.GET, produces = "application/json")
 	public Object getHotelsBasedonCity(@RequestParam(value = "cityName", required = true) String cityName,
 			@RequestParam(value = "customerToken") String customerToken) throws JsonProcessingException, JSONException {
 		LOGGER.info("Hotel Serviec :: getListofHotels " + cityName);
@@ -51,6 +51,7 @@ public class HotelServices {
 	private HotelsBasedOnCityResponse buildHotelDetailsReponse(Hotel_Master hotel) {
 		HotelsBasedOnCityResponse hotelsBasedOnCityResponse;
 		hotelsBasedOnCityResponse = new HotelsBasedOnCityResponse();
+		hotelsBasedOnCityResponse.setHotelID(hotel.getHotel_Id());
 		hotelsBasedOnCityResponse.setHotelName(hotel.getHotel_Name());
 		hotelsBasedOnCityResponse.setAddress1(hotel.getHotel_Address());
 		hotelsBasedOnCityResponse.setMinCost(hotel.getPricinginfo().get(0).getPricePerMinute());
