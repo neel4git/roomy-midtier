@@ -2,7 +2,6 @@ package com.Roomy.Response.Domain;
 
 public class LoginResponse {
 
-	private String responseData;
 	private String userId;
 	private String emailAddress;
 	private String contactNumber;
@@ -10,15 +9,6 @@ public class LoginResponse {
 	private String middleName;
 	private String lastName;
 	private String userType;
-	private String customerToken;
-
-	public String getResponseData() {
-		return responseData;
-	}
-
-	public void setResponseData(String responseData) {
-		this.responseData = responseData;
-	}
 
 	public String getUserId() {
 		return userId;
@@ -74,14 +64,6 @@ public class LoginResponse {
 
 	public void setUserType(String userType) {
 		this.userType = userType;
-	}
-
-	public String getCustomerToken() {
-		return customerToken;
-	}
-
-	public void setCustomerToken(String customerToken) {
-		this.customerToken = customerToken;
 	}
 
 }
