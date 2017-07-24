@@ -7,8 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedStoredProcedureQueries;
+import javax.persistence.NamedStoredProcedureQuery;
+import javax.persistence.StoredProcedureParameter;
 import javax.persistence.Transient;
-
+import javax.persistence.ParameterMode;
 import org.hibernate.annotations.Nationalized;
 
 @Entity(name = "User_Master")
@@ -20,7 +23,7 @@ public class UserMaster implements Serializable {
 	@Id
 	@Column(name = "USERID", unique = true)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private int userId;	
+	private int userId;
 
 	@Column(name = "Email_Address")
 	private String emailAddress;
@@ -40,7 +43,6 @@ public class UserMaster implements Serializable {
 	@Column(name = "User_Type", nullable = true)
 	private String userType = "NonCorporate";
 
-	@Nationalized
 	@Column(name = "Login_Password", nullable = true)
 	private String loginPassword;
 
