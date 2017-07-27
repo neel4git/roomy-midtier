@@ -44,12 +44,24 @@ public class UserRegistrationService {
 	public Object registerUser(@RequestBody UserMaster userMaster) {
 		LOGGER.info("Entered into registerUser Service ");
 		int OTPAuth = 0;
+		UserMaster userDetailsFromDatabase = null;
 		try {
-			userMaster.setLoginPassword(aESEncryptionUtil.encrypt(userMaster.getLoginPassword()));
-			OTPAuth = RoomyUtil.generateOTP();
-			LOGGER.info("OTP generated for the given customer is " + OTPAuth + "for the user ");
-			response = new Response(ResponseStatus.SUCCESS_CODE, null, generateCustomerToken(userMaster, OTPAuth),
-					OTPAuth);
+			// Check if the User Already Register with Pobyte Or Not
+			userDetailsFromDatabase = userRepository.getUserDetailsByEmailIdOrMobile(userMaster.getEmailAddress(),
+					userMaster.getContactNumber());
+			if (userDetailsFromDatabase != null) {
+				LOGGER.info("User Already registerd in the Pobye Databse with Email is as "
+						+ userMaster.getEmailAddress() + "with mobile number as " + userMaster.getContactNumber());
+				response = new Response(ResponseStatus.FAILURE_CODE, "User already registered with Pobye", null, null);
+			}
+			// New user Register with the system
+			else {
+				userMaster.setLoginPassword(aESEncryptionUtil.encrypt(userMaster.getLoginPassword()));
+				OTPAuth = RoomyUtil.generateOTP();
+				LOGGER.info("OTP generated for the given customer is " + OTPAuth + "for the user ");
+				response = new Response(ResponseStatus.SUCCESS_CODE, null, generateCustomerToken(userMaster, OTPAuth),
+						OTPAuth);
+			}
 		} catch (Exception exception) {
 			LOGGER.error("Some Exception occurred in processing the RegisterUser Service", exception);
 			return new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.OTP_EXCEPTION_MESSAGE, null, OTPAuth);
@@ -74,14 +86,18 @@ public class UserRegistrationService {
 			} else {
 				UserMaster userMaster = userRepository.save(sourceKeyRing.getUserMaster());
 				if (userMaster != null) {
-					response = new Response(ResponseStatus.SUCCESS_CODE, "User Registered Sucessfully",	autheticateUserRequest.getCustomerToken(), null);
+					response = new Response(ResponseStatus.SUCCESS_CODE, "User Registered Sucessfully",
+							autheticateUserRequest.getCustomerToken(), null);
 				} else {
-					response = new Response(ResponseStatus.FAILURE_CODE, "User Already Registered Please login",autheticateUserRequest.getCustomerToken(), null);
+					response = new Response(ResponseStatus.FAILURE_CODE, "User Already Registered Please login",
+							autheticateUserRequest.getCustomerToken(), null);
 				}
 			}
 		} catch (Exception exception) {
 			LOGGER.error("Some Exception occurred in processing the authenticateUser Service", exception);
-			response = new Response(ResponseStatus.FAILURE_CODE,"Some Exception occurred in processing the authenticateUser Service",autheticateUserRequest.getCustomerToken(), null);		
+			response = new Response(ResponseStatus.FAILURE_CODE,
+					"Some Exception occurred in processing the authenticateUser Service",
+					autheticateUserRequest.getCustomerToken(), null);
 		}
 		return response;
 	}
@@ -96,11 +112,13 @@ public class UserRegistrationService {
 			userPassword = aESEncryptionUtil.encrypt(loginRequest.getPassword());
 			// User is trying to LOgin with EmailID
 			if (loginRequest.getEmailId() != null && loginRequest.getEmailId().trim().length() > 0) {
-				userMaster = (UserMaster) userRepository.getUserDetailsByEmailID(loginRequest.getEmailId(),userPassword);
+				userMaster = (UserMaster) userRepository.getUserDetailsByEmailID(loginRequest.getEmailId(),
+						userPassword);
 			}
 			// User is Trying to Login with Mobile
 			else {
-				userMaster = (UserMaster) userRepository.getUserDetailsByMobileNumber(loginRequest.getMobileNumber(),userPassword);
+				userMaster = (UserMaster) userRepository.getUserDetailsByMobileNumber(loginRequest.getMobileNumber(),
+						userPassword);
 			}
 			if (userMaster != null) {
 				// Record Found In Database
@@ -109,7 +127,8 @@ public class UserRegistrationService {
 				loginResponse.setFirstName(userMaster.getFirstName());
 				loginResponse.setMiddleName(userMaster.getMiddleName());
 				loginResponse.setLastName(userMaster.getLastName());
-				response = new Response(ResponseStatus.SUCCESS_CODE, "Authenticated User",generateCustomerToken(userMaster, 0), loginResponse);
+				response = new Response(ResponseStatus.SUCCESS_CODE, "Authenticated User",
+						generateCustomerToken(userMaster, 0), loginResponse);
 
 			} else {
 				// Record not found
@@ -118,7 +137,8 @@ public class UserRegistrationService {
 
 		} catch (Exception e) {
 			LOGGER.error("Exception occurred in fetching the User Details from the Database", e);
-			response = new Response(ResponseStatus.FAILURE_CODE, "Exception Occurred in fecthing the user Details", null, null);
+			response = new Response(ResponseStatus.FAILURE_CODE, "Exception Occurred in fecthing the user Details",
+					null, null);
 		}
 		return response;
 
