@@ -7,12 +7,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedStoredProcedureQueries;
-import javax.persistence.NamedStoredProcedureQuery;
-import javax.persistence.StoredProcedureParameter;
+import javax.persistence.OneToOne;
 import javax.persistence.Transient;
-import javax.persistence.ParameterMode;
-import org.hibernate.annotations.Nationalized;
+
+import org.omg.CORBA.ServerRequest;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @Entity(name = "User_Master")
 public class UserMaster implements Serializable {
@@ -43,8 +45,37 @@ public class UserMaster implements Serializable {
 	@Column(name = "User_Type", nullable = true)
 	private String userType = "NonCorporate";
 
+	@JsonIgnore
 	@Column(name = "Login_Password", nullable = true)
 	private String loginPassword;
+
+	@Transient
+	@OneToOne(mappedBy = "userMaster")	
+	private User_Info userInfo;
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
+	}
+
+	public String getUserType() {
+		return userType;
+	}
+
+	public void setUserType(String userType) {
+		this.userType = userType;
+	}
+
+	public User_Info getUserInfo() {
+		return userInfo;
+	}
+
+	public void setUserInfo(User_Info userInfo) {
+		this.userInfo = userInfo;
+	}
 
 	public String getEmailAddress() {
 		return emailAddress;

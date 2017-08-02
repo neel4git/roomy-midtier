@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Roomy.Repository.UserRepository;
@@ -44,18 +45,18 @@ public class UserRegistrationService {
 	public Object registerUser(@RequestBody UserMaster userMaster) {
 		LOGGER.info("Entered into registerUser Service ");
 		int OTPAuth = 0;
-		UserMaster userDetailsFromDatabase = null;
+		UserMaster userMasterfromDB = null;
 		try {
 			// Check if the User Already Register with Pobyte Or Not
-			userDetailsFromDatabase = userRepository.getUserDetailsByEmailIdOrMobile(userMaster.getEmailAddress(),
+			userMasterfromDB = userRepository.getUserDetailsByEmailIdOrMobile(userMaster.getEmailAddress(),
 					userMaster.getContactNumber());
-			if (userDetailsFromDatabase != null) {
+			if (userMasterfromDB != null) {
 				LOGGER.info("User Already registerd in the Pobye Databse with Email is as "
 						+ userMaster.getEmailAddress() + "with mobile number as " + userMaster.getContactNumber());
 				response = new Response(ResponseStatus.FAILURE_CODE, "User already registered with Pobye", null, null);
 			}
 			// New user Register with the system
-			else {
+			else if (userMasterfromDB == null) {
 				userMaster.setLoginPassword(aESEncryptionUtil.encrypt(userMaster.getLoginPassword()));
 				OTPAuth = RoomyUtil.generateOTP();
 				LOGGER.info("OTP generated for the given customer is " + OTPAuth + "for the user ");
@@ -102,6 +103,21 @@ public class UserRegistrationService {
 		return response;
 	}
 
+	@RequestMapping(value = "/getUserProfileDetails", method = RequestMethod.POST)
+	public Object getUserProfileDetails(@RequestParam(value = "customerToken") String customerToken,
+			@RequestParam(value = "mobileNumber") String mobileNumber) {
+		LOGGER.info("UserProfile Details");
+		UserMaster userProfileDetails = new UserMaster();
+		try {
+			userProfileDetails = userRepository.getUserProfileDetails(mobileNumber);
+			response = new Response(ResponseStatus.SUCCESS_CODE, null, null, userProfileDetails);
+		} catch (Exception exception) {
+			LOGGER.error("Some Exception occurred in processing the RegisterUser Service", exception);
+			return new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.OTP_EXCEPTION_MESSAGE, null, null);
+		}
+		return response;
+	}
+
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Object getCustomerDetails(@RequestBody LoginRequest loginRequest) {
 		LOGGER.info("Entered into Login Service  withe the emnail ID" + loginRequest.getEmailId());
@@ -110,17 +126,10 @@ public class UserRegistrationService {
 		LoginResponse loginResponse = new LoginResponse();
 		try {
 			userPassword = aESEncryptionUtil.encrypt(loginRequest.getPassword());
-			// User is trying to LOgin with EmailID
-			if (loginRequest.getEmailId() != null && loginRequest.getEmailId().trim().length() > 0) {
-				userMaster = (UserMaster) userRepository.getUserDetailsByEmailID(loginRequest.getEmailId(),
-						userPassword);
-			}
-			// User is Trying to Login with Mobile
-			else {
-				userMaster = (UserMaster) userRepository.getUserDetailsByMobileNumber(loginRequest.getMobileNumber(),
-						userPassword);
-			}
+			userMaster = userRepository.getUserDetails(loginRequest.getEmailId(), userPassword,
+					loginRequest.getMobileNumber());
 			if (userMaster != null) {
+				// update the Customer Token in the database
 				// Record Found In Database
 				loginResponse.setEmailAddress(userMaster.getEmailAddress());
 				loginResponse.setContactNumber(userMaster.getContactNumber());
@@ -148,12 +157,11 @@ public class UserRegistrationService {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		// Set the SourceKeyRing vale to generate the Key
-		SourceKeyRing keyRing = new SourceKeyRing();
-		UserMaster userMasterSourceKeyRing = userMaster;
-		keyRing.setUserMaster(userMasterSourceKeyRing);
-		keyRing.setOtp(OTPAuth);
-		keyRing.setOtpIssuedTime(dateFormat.format(date));
-		return JwtKeyUtil.createJWT(keyRing);
+		SourceKeyRing sourceKeyRing = new SourceKeyRing();
+		sourceKeyRing.setUserMaster(userMaster);
+		sourceKeyRing.setOtp(OTPAuth);
+		sourceKeyRing.setOtpIssuedTime(dateFormat.format(date));
+		return JwtKeyUtil.createJWT(sourceKeyRing);
 	}
 
 	private SourceKeyRing decryptyToken(String token)
@@ -167,4 +175,5 @@ public class UserRegistrationService {
 		}
 		return sourceKeyRing;
 	}
+
 }
