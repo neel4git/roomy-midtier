@@ -1,7 +1,1 @@
-/.h2.server.properties
-/application.properties
 /com/
-/data-h2.sql
-/logback.xml
-/org/
-/schema-h2.sql
