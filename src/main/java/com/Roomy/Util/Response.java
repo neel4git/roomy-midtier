@@ -2,15 +2,15 @@ package com.Roomy.Util;
 
 public class Response {
 
-	public Response(int statusCode, String statusMessage, String jwtToken, Object result) {
+	public Response(int statusCode, Object object, String jwtToken, Object result) {
 		this.statusCode = statusCode;
-		this.statusMessage = statusMessage;
+		this.statusMessage = object;
 		this.jwtToken = jwtToken;
 		this.result = result;
 	}
 
 	private int statusCode;
-	private String statusMessage;
+	private Object statusMessage;
 	private Object result;
 	private String jwtToken;
 
@@ -30,7 +30,7 @@ public class Response {
 		this.statusCode = statusCode;
 	}
 
-	public String getStatusMessage() {
+	public Object getStatusMessage() {
 		return statusMessage;
 	}
 

@@ -4,6 +4,7 @@ public class ResponseStatus {
 
 	public static int SUCCESS_CODE = 0;
 	public static int FAILURE_CODE = 1;
+	public static int UNAUTH_ACCESS = 2;
 	public static String SUCESS_MESSAGE = "SUCCESS";
 	public static String FAILURE_MESSAGE = "FAILURE";
 	public static String NO_RECORDS_FOUND = "No Hotels found ,Please try again !";
