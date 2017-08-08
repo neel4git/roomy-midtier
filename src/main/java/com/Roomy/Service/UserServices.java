@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.Roomy.Request.Domain.LoginRequest;
 import com.Roomy.Response.Domain.HotelsListByRadius;
-import com.Roomy.Response.Domain.UseRDetails;
+import com.Roomy.Response.Domain.UserDetails;
 import com.Roomy.Util.AESEncryptionUtil;
 import com.Roomy.Util.Response;
 import com.Roomy.Util.ResponseStatus;
@@ -38,98 +38,83 @@ public class UserServices {
 	public UserPobyteJdbc userPobyteJdbc = new UserPobyteJdbc();
 
 	@RequestMapping(value = "/userLogin", method = RequestMethod.POST, produces = "application/json")
-	public Response userLogin(@RequestBody LoginRequest loginRequest)
-			throws Exception {
+	public Response userLogin(@RequestBody LoginRequest loginRequest) throws Exception {
 
-		UseRDetails useRDetails = null;
+		UserDetails userDetails = null;
 		List<Object> response = new ArrayList<>();
-		StoredProcedureQuery sp = entityManager
-				.createStoredProcedureQuery("USER_LOGIN");
-		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class,
-				ParameterMode.IN);
-		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class,
-				ParameterMode.IN);
+		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_LOGIN");
+		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
 
 		if (loginRequest.getMobileNumber() != null) {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getMobileNumber());
 		} else {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getEmailId());
 		}
-		sp.setParameter("LOGIN_PASSWORD",
-				aESEncryptionUtil.encrypt(loginRequest.getPassword()));
+		sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(loginRequest.getPassword()));
 
 		boolean exist = sp.execute();
 		if (exist == true) {
 			List<Object[]> resultList = sp.getResultList();
-			if (resultList.size() > 0
-					&& resultList.contains("Failure:WrongCredentials")) {
-				useRDetails = new UseRDetails();
-				useRDetails.setResponse("Failure:WrongCredentials");
-				response.add(useRDetails);
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE,
-						useRDetails.getResponse(), null, null);
+			if (resultList.size() > 0 && resultList.contains("Failure:WrongCredentials")) {
+				userDetails = new UserDetails();
+				userDetails.setResponse("Failure:WrongCredentials");
+				response.add(userDetails);
+				responseMessage = new Response(ResponseStatus.FAILURE_CODE, userDetails.getResponse(), null, null);
 				return responseMessage;
 
-			} else if (resultList.size() > 0
-					&& resultList.contains("Failure:InactiveOrSuspendedUser")) {
-				useRDetails = new UseRDetails();
-				useRDetails.setResponse("Failure:InactiveOrSuspendedUser");
-				response.add(useRDetails);
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE,
-						useRDetails.getResponse(), null, null);
+			} else if (resultList.size() > 0 && resultList.contains("Failure:InactiveOrSuspendedUser")) {
+				userDetails = new UserDetails();
+				userDetails.setResponse("Failure:InactiveOrSuspendedUser");
+				response.add(userDetails);
+				responseMessage = new Response(ResponseStatus.FAILURE_CODE, userDetails.getResponse(), null, null);
 				return responseMessage;
 
 			} else {
 
 				for (Object[] result : resultList) {
-					useRDetails = new UseRDetails();
-					useRDetails.setResponse(result[0]);
-					useRDetails.setUserID(result[1]);
-					useRDetails.setContactNumber(result[2]);
-					useRDetails.setEmailAddress(result[3]);
-					useRDetails.setFirst_Name(result[4]);
-					useRDetails.setMidle_Name(result[5]);
-					useRDetails.setLast_Name(result[6]);
-					useRDetails.setUser_type(result[7]);
-					useRDetails.setMemberShip_type(result[8]);
-					useRDetails.setIdentityCardType(result[9]);
-					useRDetails.setIdentityCardNumber(result[10]);
-					useRDetails.setCompanyName(result[11]);
-					useRDetails.setEmergencyContactNumber1(result[12]);
-					useRDetails.setEmergencyContactNumber2(result[13]);
-					useRDetails.setDateOfBirth(result[14]);
-					useRDetails.setCityPrefrence(result[15]);
-					useRDetails.setSmsNotificationPrefrences(result[16]);
-					useRDetails.setEmailNotificationPrefrences(result[17]);
-					useRDetails.setUserStatus(result[18]);
-					useRDetails.setUserTokenValue(result[19]);
+					userDetails = new UserDetails();
+					userDetails.setResponse(result[0]);
+					userDetails.setUserID(result[1]);
+					userDetails.setContactNumber(result[2]);
+					userDetails.setEmailAddress(result[3]);
+					userDetails.setFirst_Name(result[4]);
+					userDetails.setMidle_Name(result[5]);
+					userDetails.setLast_Name(result[6]);
+					userDetails.setUser_type(result[7]);
+					userDetails.setMemberShip_type(result[8]);
+					userDetails.setIdentityCardType(result[9]);
+					userDetails.setIdentityCardNumber(result[10]);
+					userDetails.setCompanyName(result[11]);
+					userDetails.setEmergencyContactNumber1(result[12]);
+					userDetails.setEmergencyContactNumber2(result[13]);
+					userDetails.setDateOfBirth(result[14]);
+					userDetails.setCityPrefrence(result[15]);
+					userDetails.setSmsNotificationPrefrences(result[16]);
+					userDetails.setEmailNotificationPrefrences(result[17]);
+					userDetails.setUserStatus(result[18]);
+					userDetails.setUserTokenValue(result[19]);
 
-					response.add(useRDetails);
-					responseMessage = new Response(ResponseStatus.SUCCESS_CODE,
-							null, null, useRDetails);
+					response.add(userDetails);
+					responseMessage = new Response(ResponseStatus.SUCCESS_CODE, null, null, userDetails);
 				}
 
 			}
 
 		} else {
-			responseMessage = new Response(ResponseStatus.FAILURE_CODE,
-					"No Records found", null, "");
+			responseMessage = new Response(ResponseStatus.FAILURE_CODE, "No Records found", null, "");
 		}
 
 		return responseMessage;
 	}
 
 	@RequestMapping(value = "/userLogout", method = RequestMethod.POST, produces = "application/json")
-	public Response userLogout(
-			@RequestParam(value = "userID", required = false) int userID,
-			@RequestParam(value = "jwtToken") String jwtToken)
-			throws JsonProcessingException, SQLException {
+	public Response userLogout(@RequestParam(value = "userID", required = false) int userID,
+			@RequestParam(value = "jwtToken") String jwtToken) throws JsonProcessingException, SQLException {
 
 		if (userPobyteJdbc.validateJwtToken(jwtToken)) {
-			StoredProcedureQuery sp = entityManager
-					.createStoredProcedureQuery("USER_LOGOUT");
-			sp.registerStoredProcedureParameter("USER_ID", Integer.class,
-					ParameterMode.IN);
+			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_LOGOUT");
+			sp.registerStoredProcedureParameter("USER_ID", Integer.class, ParameterMode.IN);
 
 			sp.setParameter("USER_ID", userID);
 			boolean exist = sp.execute();
@@ -138,41 +123,33 @@ public class UserServices {
 				if (resultList.size() > 0 && resultList.contains("Success")) {
 					System.out.println("Logout");
 				} else {
-					responseMessage = new Response(ResponseStatus.SUCCESS_CODE,
-							ResponseStatus.SUCESS_MESSAGE, null, exist);
+					responseMessage = new Response(ResponseStatus.SUCCESS_CODE, ResponseStatus.SUCESS_MESSAGE, null,
+							exist);
 				}
 
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE,
-						ResponseStatus.FAILURE_MESSAGE, null, exist);
+				responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.FAILURE_MESSAGE, null,
+						exist);
 			}
 
 		} else {
-			responseMessage = new Response(ResponseStatus.UNAUTH_ACCESS,
-					"UnAuthrorized access,Please login", "", "");
+			responseMessage = new Response(ResponseStatus.UNAUTH_ACCESS, "UnAuthrorized access,Please login", "", "");
 		}
 
 		return responseMessage;
 	}
 
 	@RequestMapping(value = "/getHotelsbyLocation", method = RequestMethod.POST, produces = "application/json")
-	public Response getHotels(
-			@RequestParam(value = "user_Latitude") float user_Latitude,
-			@RequestParam(value = "user_Longitude") float user_Longitude,
-			@RequestParam(value = "radius") int radius,
-			@RequestParam(value = "jwtToken") String jwtToken)
-			throws JsonProcessingException, SQLException {
+	public Response getHotels(@RequestParam(value = "user_Latitude") float user_Latitude,
+			@RequestParam(value = "user_Longitude") float user_Longitude, @RequestParam(value = "radius") int radius,
+			@RequestParam(value = "jwtToken") String jwtToken) throws JsonProcessingException, SQLException {
 
 		if (userPobyteJdbc.validateJwtToken(jwtToken)) {
 			List<HotelsListByRadius> hotelsListByRadiusList = new ArrayList<HotelsListByRadius>();
 			HotelsListByRadius hotelsListByRadius = new HotelsListByRadius();
-			StoredProcedureQuery sp = entityManager
-					.createStoredProcedureQuery("GET_HOTELS_BY_RADIUS");
-			sp.registerStoredProcedureParameter("USER_LATITUDE", Float.class,
-					ParameterMode.IN);
-			sp.registerStoredProcedureParameter("USER_LONGITUDE", Float.class,
-					ParameterMode.IN);
-			sp.registerStoredProcedureParameter("RADIUS", Integer.class,
-					ParameterMode.IN);
+			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("GET_HOTELS_BY_RADIUS");
+			sp.registerStoredProcedureParameter("USER_LATITUDE", Float.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("USER_LONGITUDE", Float.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("RADIUS", Integer.class, ParameterMode.IN);
 
 			sp.setParameter("USER_LATITUDE", user_Latitude);
 			sp.setParameter("USER_LONGITUDE", user_Longitude);
@@ -202,38 +179,29 @@ public class UserServices {
 					hotelsListByRadiusList.add(hotelsListByRadius);
 				}
 				System.out.println(hotelsListByRadiusList);
-				responseMessage = new Response(ResponseStatus.SUCCESS_CODE,
-						ResponseStatus.SUCESS_MESSAGE, null,
+				responseMessage = new Response(ResponseStatus.SUCCESS_CODE, ResponseStatus.SUCESS_MESSAGE, null,
 						hotelsListByRadiusList);
 			} else {
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE,
-						ResponseStatus.FAILURE_MESSAGE, null, "");
+				responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.FAILURE_MESSAGE, null, "");
 			}
 
 		} else {
-			responseMessage = new Response(ResponseStatus.UNAUTH_ACCESS,
-					"UnAuthrorized access,Please login", "", "");
+			responseMessage = new Response(ResponseStatus.UNAUTH_ACCESS, "UnAuthrorized access,Please login", "", "");
 
 		}
 		return responseMessage;
 	}
 
 	@RequestMapping(value = "/updateUserProfile", method = RequestMethod.POST, produces = "application/json")
-	public Response updateUserProfile(@RequestBody UseRDetails useRDetails,
-			@RequestParam(value = "jwtToken") String jwtToken)
-			throws JsonProcessingException, SQLException {
+	public Response updateUserProfile(@RequestBody UserDetails useRDetails,
+			@RequestParam(value = "jwtToken") String jwtToken) throws JsonProcessingException, SQLException {
 
 		if (validateJwtToken(jwtToken)) {
-			StoredProcedureQuery sp = entityManager
-					.createStoredProcedureQuery("UPDATE_USER_PROFILE");
-			sp.registerStoredProcedureParameter("USER_ID", String.class,
-					ParameterMode.IN);
-			sp.registerStoredProcedureParameter("FIRST_NAME", String.class,
-					ParameterMode.IN);
-			sp.registerStoredProcedureParameter("MIDDLE_NAME", String.class,
-					ParameterMode.IN);
-			sp.registerStoredProcedureParameter("LAST_NAME", String.class,
-					ParameterMode.IN);
+			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_PROFILE");
+			sp.registerStoredProcedureParameter("USER_ID", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("FIRST_NAME", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("MIDDLE_NAME", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("LAST_NAME", String.class, ParameterMode.IN);
 
 			sp.setParameter("USER_ID", useRDetails.getUserID());
 			sp.setParameter("FIRST_NAME", useRDetails.getFirst_Name());
@@ -245,16 +213,15 @@ public class UserServices {
 			if (exist == true) {
 				List<Object[]> resultList = sp.getResultList();
 				if (resultList.size() > 0 && resultList.contains("Success")) {
-					responseMessage = new Response(ResponseStatus.SUCCESS_CODE,
-							ResponseStatus.SUCESS_MESSAGE, null, exist);
+					responseMessage = new Response(ResponseStatus.SUCCESS_CODE, ResponseStatus.SUCESS_MESSAGE, null,
+							exist);
 				} else {
-					responseMessage = new Response(ResponseStatus.FAILURE_CODE,
-							ResponseStatus.FAILURE_MESSAGE, null, exist);
+					responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.FAILURE_MESSAGE, null,
+							exist);
 				}
 			}
 		} else {
-			responseMessage = new Response(ResponseStatus.UNAUTH_ACCESS,
-					"UnAuthrorized access,Please login", "", "");
+			responseMessage = new Response(ResponseStatus.UNAUTH_ACCESS, "UnAuthrorized access,Please login", "", "");
 		}
 		return responseMessage;
 	}
@@ -288,23 +255,19 @@ public class UserServices {
 	 * boolean exist = sp.execute();
 	 * 
 	 * if(exist == true){ List<Object[]> resultList = sp.getResultList(); if
-	 * (resultList.size() > 0 && resultList.contains("Success")) {
-	 * responseMessage = new
-	 * Response(ResponseStatus.SUCCESS_CODE,ResponseStatus.
+	 * (resultList.size() > 0 && resultList.contains("Success")) { responseMessage =
+	 * new Response(ResponseStatus.SUCCESS_CODE,ResponseStatus.
 	 * SUCESS_MESSAGE,null,exist); }else{ responseMessage = new
 	 * Response(ResponseStatus
 	 * .FAILURE_CODE,ResponseStatus.FAILURE_MESSAGE,null,exist); } } return
 	 * responseMessage; }
 	 */
 	@RequestMapping(value = "/getJwtToken", method = RequestMethod.POST, produces = "application/json")
-	public Response getJwtToken(
-			@RequestParam(value = "mobileNumber") String mobileNumber)
+	public Response getJwtToken(@RequestParam(value = "mobileNumber") String mobileNumber)
 			throws JsonProcessingException, SQLException {
 
-		StoredProcedureQuery sp = entityManager
-				.createStoredProcedureQuery("GET_TOKEN");
-		sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class,
-				ParameterMode.IN);
+		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("GET_TOKEN");
+		sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
 		System.out.println(mobileNumber);
 		if (mobileNumber != null) {
 			sp.setParameter("CONTACT_NUMBER", mobileNumber);
@@ -318,24 +281,19 @@ public class UserServices {
 			token = resultList.toString();
 
 			System.out.println(token);
-			responseMessage = new Response(ResponseStatus.SUCCESS_CODE,
-					ResponseStatus.SUCESS_MESSAGE, token, "");
+			responseMessage = new Response(ResponseStatus.SUCCESS_CODE, ResponseStatus.SUCESS_MESSAGE, token, "");
 		} else {
-			responseMessage = new Response(ResponseStatus.FAILURE_CODE,
-					"User is not logged in.!", null, "");
+			responseMessage = new Response(ResponseStatus.FAILURE_CODE, "User is not logged in.!", null, "");
 		}
 
 		return responseMessage;
 	}
 
-	public boolean validateJwtToken(String jwtToken)
-			throws JsonProcessingException, SQLException {
+	public boolean validateJwtToken(String jwtToken) throws JsonProcessingException, SQLException {
 
-		StoredProcedureQuery sp = entityManager
-				.createStoredProcedureQuery("VALIDATE_JWTTOKEN");
+		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("VALIDATE_JWTTOKEN");
 
-		sp.registerStoredProcedureParameter("USER_TOKEN_VALUE", String.class,
-				ParameterMode.IN);
+		sp.registerStoredProcedureParameter("USER_TOKEN_VALUE", String.class, ParameterMode.IN);
 
 		sp.setParameter("USER_TOKEN_VALUE", jwtToken);
 		boolean result = sp.execute();
