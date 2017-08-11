@@ -12,4 +12,6 @@ public class ResponseStatus {
 	public static String WRONG_OTP_EXCEPTION = "OTP Entered is wrong Please enter the valid OTP ";
 	public static String OTP_EXPIRED_EXCEPTION = "OTP Entered is Expired Please Generate a New OTP ";
 	public static String USER_RECORDS_NOT_FOUND = "No records Found with Roomy Please register";
+	public static String DASHBOARD_HOTEL_DETAILS_EXCEPTION="Exception Occurred while getting the hotel Details for dashbaord";
+	
 }

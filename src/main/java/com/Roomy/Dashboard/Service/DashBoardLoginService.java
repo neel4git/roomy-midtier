@@ -75,7 +75,7 @@ public class DashBoardLoginService {
 				for (Object[] result : resultList) {
 					// Hotel Detail Associated for that User
 					hotelDetails = new HotelDetails();
-					hotelDetails.setHotelId(result[21].toString());
+					hotelDetails.setHotelId(Integer.parseInt(result[21].toString()));
 					hotelDetails.setHotelName(result[22].toString());
 					hotelDetailsList.add(hotelDetails);
 				}

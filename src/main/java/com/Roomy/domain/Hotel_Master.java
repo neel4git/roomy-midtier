@@ -22,8 +22,7 @@ public class Hotel_Master implements Serializable {
 	@OneToOne
 	@PrimaryKeyJoinColumn
 	private Hotel_Info hotel_Info;
-	
-	
+
 	@Id
 	@Column(name = "Hotel_Id", unique = true)
 	private int hotel_Id;
@@ -199,6 +198,14 @@ public class Hotel_Master implements Serializable {
 
 	public void setContact_No3(String contact_No3) {
 		this.contact_No3 = contact_No3;
+	}
+
+	public Hotel_Info getHotel_Info() {
+		return hotel_Info;
+	}
+
+	public void setHotel_Info(Hotel_Info hotel_Info) {
+		this.hotel_Info = hotel_Info;
 	}
 
 }

@@ -12,4 +12,6 @@ public interface Hotel_MasterRepository extends CrudRepository<Hotel_Master, Lon
 	@Query("SELECT hotelMaster FROM Hotel_Master hotelMaster  WHERE hotelMaster.hotel_City=?1")
 	List<Hotel_Master> getHotelMasterDetails(String hotel_City);
 
+	@Query("SELECT hotelMaster FROM Hotel_Master hotelMaster  WHERE hotelMaster.hotel_Id=?1")
+	List<Hotel_Master> getHotelDetailsByID(int hotel_ID);
 }
