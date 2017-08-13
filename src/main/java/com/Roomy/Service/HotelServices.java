@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.Roomy.Repository.Hotel_InfoRepository;
 import com.Roomy.Repository.Hotel_MasterRepository;
 import com.Roomy.Response.Domain.HotelsBasedOnCityResponse;
-import com.Roomy.Util.Response;
-import com.Roomy.Util.ResponseStatus;
 import com.Roomy.domain.Hotel_Info;
 import com.Roomy.domain.Hotel_Master;
+import com.Roomy.domain.Response;
+import com.Roomy.domain.ResponseStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController

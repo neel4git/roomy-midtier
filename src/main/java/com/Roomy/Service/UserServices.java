@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.Roomy.Dao.UserPobyteJdbc;
 import com.Roomy.Request.Domain.LoginRequest;
 import com.Roomy.Response.Domain.HotelsListByRadius;
 import com.Roomy.Response.Domain.UserDetails;
 import com.Roomy.Util.AESEncryptionUtil;
-import com.Roomy.Util.Response;
-import com.Roomy.Util.ResponseStatus;
-import com.Roomy.jdbc.UserPobyteJdbc;
+import com.Roomy.domain.Response;
+import com.Roomy.domain.ResponseStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 @RestController
