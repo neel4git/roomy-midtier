@@ -4,6 +4,8 @@ public class LoginRequest {
 	String mobileNumber;
 	String password;
 	String emailId;
+	String loginType;
+	
 
 	public String getMobileNumber() {
 		return mobileNumber;
@@ -29,4 +31,14 @@ public class LoginRequest {
 		this.emailId = emailId;
 	}
 
+	public String getLoginType() {
+		return loginType;
+	}
+
+	public void setLoginType(String loginType) {
+		this.loginType = loginType;
+	}
+	
+	
+	
 }

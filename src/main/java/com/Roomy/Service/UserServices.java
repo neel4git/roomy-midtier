@@ -38,19 +38,25 @@ public class UserServices {
 	public UserPobyteJdbc userPobyteJdbc = new UserPobyteJdbc();
 
 	@RequestMapping(value = "/userLogin", method = RequestMethod.POST, produces = "application/json")
-	public Response userLogin(@RequestBody LoginRequest loginRequest) throws Exception {
+	public Response userLogin(@RequestBody LoginRequest loginRequest,@RequestParam(value = "jwtToken") String jwtToken) throws Exception {
 
 		UserDetails userDetails = null;
 		List<Object> response = new ArrayList<>();
 		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_LOGIN");
 		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("LOGIN_TYPE", String.class, ParameterMode.IN);
 
+		if(loginRequest.getLoginType().equals("CREDENTIALS")){
 		if (loginRequest.getMobileNumber() != null) {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getMobileNumber());
 		} else {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getEmailId());
 		}
+		}else{
+			sp.setParameter("LOGIN_DETAIL", jwtToken);
+		}
+		sp.setParameter("LOGIN_TYPE", loginRequest.getLoginType());
 		sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(loginRequest.getPassword()));
 
 		boolean exist = sp.execute();
