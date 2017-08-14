@@ -38,7 +38,7 @@ public class UserServices {
 	public UserPobyteJdbc userPobyteJdbc = new UserPobyteJdbc();
 
 	@RequestMapping(value = "/userLogin", method = RequestMethod.POST, produces = "application/json")
-	public Response userLogin(@RequestBody LoginRequest loginRequest,@RequestParam(value = "jwtToken") String jwtToken) throws Exception {
+	public Response userLogin(@RequestBody LoginRequest loginRequest) throws Exception {
 
 		UserDetails userDetails = null;
 		List<Object> response = new ArrayList<>();
@@ -54,7 +54,7 @@ public class UserServices {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getEmailId());
 		}
 		}else{
-			sp.setParameter("LOGIN_DETAIL", jwtToken);
+			sp.setParameter("LOGIN_DETAIL",loginRequest.getJwtToken());
 		}
 		sp.setParameter("LOGIN_TYPE", loginRequest.getLoginType());
 		sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(loginRequest.getPassword()));
