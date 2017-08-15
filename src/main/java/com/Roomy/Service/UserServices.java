@@ -1,7 +1,12 @@
 package com.Roomy.Service;
 
+import java.io.IOException;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -16,13 +21,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Roomy.Dao.UserPobyteJdbc;
+import com.Roomy.Request.Domain.AutheticateUserRequest;
 import com.Roomy.Request.Domain.LoginRequest;
+import com.Roomy.Request.Domain.UserRegistrationRequest;
 import com.Roomy.Response.Domain.HotelsListByRadius;
 import com.Roomy.Response.Domain.UserDetails;
 import com.Roomy.Util.AESEncryptionUtil;
+import com.Roomy.Util.JwtKeyUtil;
+import com.Roomy.Util.RoomyUtil;
 import com.Roomy.domain.Response;
 import com.Roomy.domain.ResponseStatus;
+import com.Roomy.domain.SourceKeyRing;
+import com.Roomy.domain.UserMaster;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.JWTClaimsSet;
 
 @RestController
 public class UserServices {
@@ -35,8 +51,95 @@ public class UserServices {
 	@Autowired
 	AESEncryptionUtil aESEncryptionUtil;
 
-	public UserPobyteJdbc userPobyteJdbc = new UserPobyteJdbc();
+	public UserPobyteJdbc userPobyteJdbc;
 
+	
+	
+	
+	@RequestMapping(value = "/userRegistration", method = RequestMethod.POST, produces = "application/json")
+	public Response userRegistration(@RequestBody UserRegistrationRequest userRegistrationRequest) throws Exception {
+		
+		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_REGISTRATION");
+		sp.registerStoredProcedureParameter("REGISTRATION_TYPE", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("EMAIL_ADDRESS", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("FIRST_NAME", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("MIDDLE_NAME", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("LAST_NAME", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("USER_TYPE", String.class, ParameterMode.IN);
+				
+		sp.setParameter("REGISTRATION_TYPE", userRegistrationRequest.getRegistrationType());
+		sp.setParameter("EMAIL_ADDRESS", userRegistrationRequest.getEmailId());
+		sp.setParameter("CONTACT_NUMBER", userRegistrationRequest.getConactNumber());
+		sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRegistrationRequest.getPasword()));
+		sp.setParameter("FIRST_NAME", userRegistrationRequest.getFirstName());
+		sp.setParameter("MIDDLE_NAME", userRegistrationRequest.getMiddleName());
+		sp.setParameter("LAST_NAME", userRegistrationRequest.getLastName());
+		sp.setParameter("USER_TYPE", userRegistrationRequest.getUserType());
+		boolean exist = sp.execute();
+		if (exist == true) {
+			List<Object[]> resultList = sp.getResultList();
+			if (resultList.size() > 0 && resultList.contains("Success")) {
+				int OTPAuth = RoomyUtil.generateOTP();
+				responseMessage = new Response(ResponseStatus.SUCCESS_CODE, null, generateCustomerToken(userRegistrationRequest, OTPAuth),
+						OTPAuth);
+				return responseMessage;
+			}
+			if (resultList.size() > 0 && resultList.contains("Failure:ContactNumberExists")) {
+				responseMessage = new Response(ResponseStatus.FAILURE_CODE, "Mobile Number is already register,Please login", null, null);
+				return responseMessage;
+			}
+			if (resultList.size() > 0 && resultList.contains("Failure:EmailAddressExists")) {
+				responseMessage = new Response(ResponseStatus.FAILURE_CODE, "Email Id is already register,Please login", null, null);
+				return responseMessage;
+			}
+		}
+		return responseMessage;
+	}
+	
+	@RequestMapping(value = "/authenticateUser", method = RequestMethod.POST)
+	public Object authenticateUser(@RequestBody AutheticateUserRequest autheticateUserRequest) {
+	
+		try {
+			SourceKeyRing sourceKeyRing = decryptyToken(autheticateUserRequest.getCustomerToken());
+			// if otp didnot matched
+			if (autheticateUserRequest.getOtp().equals(sourceKeyRing.getOtp())) {
+				responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.WRONG_OTP_EXCEPTION,
+						autheticateUserRequest.getCustomerToken(), null);
+			}
+			// if OTP issued time is excceded greater than 15 minutes
+			else if (RoomyUtil.getOtpIssueTimeDiffrence(sourceKeyRing.getOtpIssuedTime()) > 15) {
+				responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.OTP_EXPIRED_EXCEPTION,
+						autheticateUserRequest.getCustomerToken(), null);
+			} else {
+				//sp
+				StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_STATUS");
+				sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
+				sp.setParameter("CONTACT_NUMBER", sourceKeyRing.getRegistrationRequest().getConactNumber());
+				boolean exist = sp.execute();
+				if (exist == true) {
+					List<Object[]> resultList = sp.getResultList();
+					if (resultList.size() > 0 && resultList.contains("Success")) {
+					responseMessage = new Response(ResponseStatus.SUCCESS_CODE, "User Registered Sucessfully",
+							autheticateUserRequest.getCustomerToken(), null);
+				} else {
+					responseMessage = new Response(ResponseStatus.FAILURE_CODE, "User Already Registered Please login",
+							autheticateUserRequest.getCustomerToken(), null);
+				}
+			}
+			}
+		}
+		 catch (Exception exception) {
+			
+			responseMessage = new Response(ResponseStatus.FAILURE_CODE,
+					"Some Exception occurred in processing the authenticateUser Service",
+					autheticateUserRequest.getCustomerToken(), null);
+		}
+		return responseMessage;
+	}
+	
+	
 	@RequestMapping(value = "/userLogin", method = RequestMethod.POST, produces = "application/json")
 	public Response userLogin(@RequestBody LoginRequest loginRequest) throws Exception {
 
@@ -232,42 +335,7 @@ public class UserServices {
 		return responseMessage;
 	}
 
-	/*
-	 * @RequestMapping(value = "/registerUser", method = RequestMethod.POST,
-	 * produces = "application/json") public Response
-	 * userResigistration(@RequestBody UserMaster userMaster) throws
-	 * JsonProcessingException, SQLException {
-	 * 
-	 * 
-	 * 
-	 * StoredProcedureQuery sp =
-	 * entityManager.createStoredProcedureQuery("USER_REGISTRATION");
-	 * sp.registerStoredProcedureParameter("USER_ID", String.class,
-	 * ParameterMode.IN); sp.registerStoredProcedureParameter("FIRST_NAME",
-	 * String.class, ParameterMode.IN);
-	 * sp.registerStoredProcedureParameter("MIDDLE_NAME", String.class,
-	 * ParameterMode.IN); sp.registerStoredProcedureParameter("LAST_NAME",
-	 * String.class, ParameterMode.IN);
-	 * 
-	 * 
-	 * sp.setParameter("CONTACT_NUMBER", userMaster.getContactNumber());
-	 * sp.setParameter("EMAIL_ADDRESS", userMaster.getEmailAddress());
-	 * sp.setParameter("LOGIN_PASSWORD", userMaster.getLoginPassword());
-	 * sp.setParameter("FIRST_NAME", userMaster.getFirstName());
-	 * sp.setParameter("MIDDLE_NAME", userMaster.getMiddleName());
-	 * sp.setParameter("LAST_NAME", userMaster.getLastName());
-	 * sp.setParameter("USER_TYPE", "Normal");
-	 * 
-	 * boolean exist = sp.execute();
-	 * 
-	 * if(exist == true){ List<Object[]> resultList = sp.getResultList(); if
-	 * (resultList.size() > 0 && resultList.contains("Success")) { responseMessage =
-	 * new Response(ResponseStatus.SUCCESS_CODE,ResponseStatus.
-	 * SUCESS_MESSAGE,null,exist); }else{ responseMessage = new
-	 * Response(ResponseStatus
-	 * .FAILURE_CODE,ResponseStatus.FAILURE_MESSAGE,null,exist); } } return
-	 * responseMessage; }
-	 */
+	
 	@RequestMapping(value = "/getJwtToken", method = RequestMethod.POST, produces = "application/json")
 	public Response getJwtToken(@RequestParam(value = "mobileNumber") String mobileNumber)
 			throws JsonProcessingException, SQLException {
@@ -309,5 +377,30 @@ public class UserServices {
 
 		return result;
 	}
+	
+	private String generateCustomerToken(UserRegistrationRequest userRegistrationRequest, int OTPAuth) throws JOSEException {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+		// Set the SourceKeyRing vale to generate the Key
+		SourceKeyRing keyRing = new SourceKeyRing();
+		UserRegistrationRequest registrationRequest = userRegistrationRequest;
+		keyRing.setRegistrationRequest(registrationRequest);
+		keyRing.setOtp(OTPAuth);
+		keyRing.setOtpIssuedTime(dateFormat.format(date));
+		return JwtKeyUtil.createJWT(keyRing);
+	}
+
+	private SourceKeyRing decryptyToken(String token)
+			throws ParseException, JOSEException, JsonParseException, JsonMappingException, IOException {
+		SourceKeyRing sourceKeyRing = null;
+		ObjectMapper mapper = new ObjectMapper();
+		JWTClaimsSet claims = (JWTClaimsSet) JwtKeyUtil.decryptToken(token);
+		Object clms = claims.getClaim("sourceKeyRing");
+		if (clms != null) {
+			sourceKeyRing = mapper.readValue((mapper.writer().writeValueAsString(clms)), SourceKeyRing.class);
+		}
+		return sourceKeyRing;
+	}
+
 
 }

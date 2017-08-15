@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.Roomy.Repository.UserRepository;
 import com.Roomy.Request.Domain.AutheticateUserRequest;
 import com.Roomy.Request.Domain.LoginRequest;
+import com.Roomy.Request.Domain.UserRegistrationRequest;
 import com.Roomy.Response.Domain.LoginResponse;
 import com.Roomy.Util.AESEncryptionUtil;
 import com.Roomy.Util.JwtKeyUtil;
@@ -40,7 +41,7 @@ public class UserRegistrationService {
 	private Response response;
 	private final static Logger LOGGER = Logger.getLogger(UserRegistrationService.class.getName());
 
-	@RequestMapping(value = "/registerUser", method = RequestMethod.POST)
+/*	@RequestMapping(value = "/registerUser", method = RequestMethod.POST)
 	public Object registerUser(@RequestBody UserMaster userMaster) {
 		LOGGER.info("Entered into registerUser Service ");
 		int OTPAuth = 0;
@@ -68,8 +69,8 @@ public class UserRegistrationService {
 		}
 		return response;
 	}
-
-	@RequestMapping(value = "/authenticateUser", method = RequestMethod.POST)
+*/
+	/*@RequestMapping(value = "/authenticateUser", method = RequestMethod.POST)
 	public Object authenticateUser(@RequestBody AutheticateUserRequest autheticateUserRequest) {
 		LOGGER.info("Entered into authenticateUser Service ");
 		try {
@@ -100,8 +101,8 @@ public class UserRegistrationService {
 					autheticateUserRequest.getCustomerToken(), null);
 		}
 		return response;
-	}
-
+	}*/
+/*
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Object getCustomerDetails(@RequestBody LoginRequest loginRequest) {
 		LOGGER.info("Entered into Login Service  withe the emnail ID" + loginRequest.getEmailId());
@@ -143,14 +144,14 @@ public class UserRegistrationService {
 		return response;
 
 	}
-
-	private String generateCustomerToken(UserMaster userMaster, int OTPAuth) throws JOSEException {
+*/
+	/*private String generateCustomerToken(UserRegistrationRequest userRegistrationRequest, int OTPAuth) throws JOSEException {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		// Set the SourceKeyRing vale to generate the Key
 		SourceKeyRing keyRing = new SourceKeyRing();
-		UserMaster userMasterSourceKeyRing = userMaster;
-		keyRing.setUserMaster(userMasterSourceKeyRing);
+		UserRegistrationRequest registrationRequest = userRegistrationRequest;
+		keyRing.setRegistrationRequest(registrationRequest);
 		keyRing.setOtp(OTPAuth);
 		keyRing.setOtpIssuedTime(dateFormat.format(date));
 		return JwtKeyUtil.createJWT(keyRing);
@@ -167,4 +168,4 @@ public class UserRegistrationService {
 		}
 		return sourceKeyRing;
 	}
-}
+*/}
