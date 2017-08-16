@@ -8,9 +8,7 @@ public class UserRegistrationRequest implements Serializable {
 	String emailId;
 	String conactNumber;
 	String pasword;
-	String firstName;
-	String middleName;
-	String lastName;
+	String Name;
 	String userType;
 	public String getRegistrationType() {
 		return registrationType;
@@ -36,23 +34,12 @@ public class UserRegistrationRequest implements Serializable {
 	public void setPasword(String pasword) {
 		this.pasword = pasword;
 	}
-	public String getFirstName() {
-		return firstName;
+
+	public String getName() {
+		return Name;
 	}
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-	public String getMiddleName() {
-		return middleName;
-	}
-	public void setMiddleName(String middleName) {
-		this.middleName = middleName;
-	}
-	public String getLastName() {
-		return lastName;
-	}
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setName(String name) {
+		Name = name;
 	}
 	public String getUserType() {
 		return userType;

@@ -65,17 +65,13 @@ public class UserServices {
 		sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("FIRST_NAME", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("MIDDLE_NAME", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("LAST_NAME", String.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("USER_TYPE", String.class, ParameterMode.IN);
 				
 		sp.setParameter("REGISTRATION_TYPE", userRegistrationRequest.getRegistrationType());
 		sp.setParameter("EMAIL_ADDRESS", userRegistrationRequest.getEmailId());
 		sp.setParameter("CONTACT_NUMBER", userRegistrationRequest.getConactNumber());
 		sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRegistrationRequest.getPasword()));
-		sp.setParameter("FIRST_NAME", userRegistrationRequest.getFirstName());
-		sp.setParameter("MIDDLE_NAME", userRegistrationRequest.getMiddleName());
-		sp.setParameter("LAST_NAME", userRegistrationRequest.getLastName());
+		sp.setParameter("FIRST_NAME", userRegistrationRequest.getName());
 		sp.setParameter("USER_TYPE", userRegistrationRequest.getUserType());
 		boolean exist = sp.execute();
 		if (exist == true) {
