@@ -12,6 +12,7 @@ import com.Roomy.Response.Domain.UserDetails;
 import com.Roomy.domain.Hotel_Master;
 import com.Roomy.domain.Response;
 import com.Roomy.domain.ResponseStatus;
+import com.Roomy.domain.RoomReservedCustomerDetails;
 
 @Component
 public class ResponseBuilder {
@@ -74,15 +75,65 @@ public class ResponseBuilder {
 			for (Object[] result : dashboardUserDeatils) {
 				// Hotel Detail Associated for that User
 				hotelDetails = new HotelDetails();
-				hotelDetails.setHotelId(Integer.parseInt(result[21].toString()));
-				hotelDetails.setHotelName(result[22].toString());
+				if (result[21] != null) {
+					hotelDetails.setHotelId(Integer.parseInt(result[21].toString()));
+				}
+				if (result[22] != null) {
+					hotelDetails.setHotelName(result[22].toString());
+				}
 				hotelDetailsList.add(hotelDetails);
 			}
-			// Fill the hotel details for the givev User
+			// Fill the hotel details for the given User
 			userDetails.setListOfHotels(hotelDetailsList);
 		}
 		// need to build the jwtToken
 		dashBoardUserDetailsResponse = new Response(ResponseStatus.SUCCESS_CODE, null, null, userDetails);
 		return dashBoardUserDetailsResponse;
 	}
+
+	@SuppressWarnings("unused")
+	public Response buildDashboardCustomerDetails(List<Object[]> dashboardUserDeatils) {
+		RoomReservedCustomerDetails roomReservedCustomerDetails = null;
+		List<RoomReservedCustomerDetails> roomReservedCustomerList = new ArrayList<RoomReservedCustomerDetails>();
+		Response dashBoardUserDetailsResponse;
+
+		if (dashboardUserDeatils == null) {
+			dashBoardUserDetailsResponse = new Response(ResponseStatus.SUCCESS_CODE,
+					"No Customers Reserved the Room for the Given Time inetrval", null, roomReservedCustomerDetails);
+			return dashBoardUserDetailsResponse;
+		} else {
+
+			for (Object[] customer : dashboardUserDeatils) {
+				roomReservedCustomerDetails = new RoomReservedCustomerDetails();
+				roomReservedCustomerDetails.setPhone(validateData(customer[0]));
+				roomReservedCustomerDetails.setEmail(validateData(customer[1]));
+				roomReservedCustomerDetails
+						.setCustomerName(validateData(customer[2] + " " + customer[3] + "" + customer[4]));
+				roomReservedCustomerDetails.setCheckInDate(validateData(customer[6]));
+				roomReservedCustomerDetails.setCheckOutDate(validateData(customer[7]));
+				roomReservedCustomerDetails.setDob(validateData(customer[9]));
+				roomReservedCustomerDetails.setProof(validateData(customer[10] + "," + customer[11]));
+				roomReservedCustomerDetails.setUserPic(validateData(customer[12]));
+				// Pending
+				roomReservedCustomerDetails.setCustomerId(validateData(""));
+				roomReservedCustomerDetails.setPlannedStay(validateData(""));
+				roomReservedCustomerDetails.setMinPrice(validateData(""));
+				roomReservedCustomerDetails.setPaymentMode(validateData(""));
+				roomReservedCustomerDetails.setStatus(validateData(""));
+				roomReservedCustomerList.add(roomReservedCustomerDetails);
+
+			}
+			dashBoardUserDetailsResponse = new Response(ResponseStatus.SUCCESS_CODE, "CustomersFound", null,
+					roomReservedCustomerList);
+
+		}
+		// need to build the jwtToken
+		dashBoardUserDetailsResponse = new Response(ResponseStatus.SUCCESS_CODE, null, null, roomReservedCustomerList);
+		return dashBoardUserDetailsResponse;
+	}
+
+	public String validateData(Object inputData) {
+		return inputData == null ? "" : inputData.toString().trim();
+	}
+
 }

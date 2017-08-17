@@ -100,23 +100,22 @@ public class UserPobyteJdbc {
 	/*
 	 * This is the method used to validate the Toekn present for the Given User
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Object[]> gteBookingsHistroy(String hotelID, int lastBookingsinDays) throws SQLException {
 		boolean bookingsFound = Boolean.FALSE;
 		List<Object[]> bookingsHistroy = null;
 		StoredProcedureQuery bookingsHistroySP = entityManager.createStoredProcedureQuery("GET_RESERVATIONS_BY_HOTEL");
-		/*bookingsHistroySP.registerStoredProcedureParameter("hotel_ID", String.class, ParameterMode.IN);
-		bookingsHistroySP.registerStoredProcedureParameter("nofoDays", String.class, ParameterMode.IN);
-
-		bookingsHistroySP.setParameter("hotel_ID", hotelID);
-		bookingsHistroySP.setParameter("nofoDays", lastBookingsinDays);*/
-
+		bookingsHistroySP.registerStoredProcedureParameter("HOTEL_ID", String.class, ParameterMode.IN);
+		bookingsHistroySP.registerStoredProcedureParameter("INTERVAL_DAYS", Integer.class, ParameterMode.IN);
+		bookingsHistroySP.setParameter("HOTEL_ID", hotelID);
+		bookingsHistroySP.setParameter("INTERVAL_DAYS", lastBookingsinDays);
 		try {
 			bookingsFound = bookingsHistroySP.execute();
 			if (bookingsFound) {
 				bookingsHistroy = bookingsHistroySP.getResultList();
 			}
 		} catch (Exception exception) {
-			LOGGER.error("An exception occurred while login into the dashbaord ", exception);
+			LOGGER.error("An exception occurred while getting the bookings histroy in DashBoardService ", exception);
 			throw new SQLException(exception.getMessage());
 		}
 		return bookingsHistroy;
