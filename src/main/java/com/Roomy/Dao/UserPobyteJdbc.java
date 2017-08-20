@@ -79,7 +79,7 @@ public class UserPobyteJdbc {
 		/*
 		 * if Mobile Number is missing Take the EmailID
 		 */
-		if (loginRequest.getMobileNumber() != null) {
+		if (loginRequest.getMobileNumber() != null &&  loginRequest.getMobileNumber().trim().length()>0) {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getMobileNumber());
 		} else {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getEmailId());

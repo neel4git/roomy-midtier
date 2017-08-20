@@ -15,11 +15,20 @@ public class RoomReservedCustomerDetails implements Serializable {
 	private String phone;
 	private String email;
 	private String dob;
-	private String proof;
+	private String idCardType;
+	private String idIssuedCity;
 	private String plannedStay;
 	private String minPrice;
 	private String paymentMode;
 	private String Status;
+
+	public String getIdCardType() {
+		return idCardType;
+	}
+
+	public void setIdCardType(String idCardType) {
+		this.idCardType = idCardType;
+	}
 
 	public String getUserPic() {
 		return userPic;
@@ -101,12 +110,12 @@ public class RoomReservedCustomerDetails implements Serializable {
 		this.dob = dob;
 	}
 
-	public String getProof() {
-		return proof;
+	public String getIdIssuedCity() {
+		return idIssuedCity;
 	}
 
-	public void setProof(String proof) {
-		this.proof = proof;
+	public void setIdIssuedCity(String idIssuedCity) {
+		this.idIssuedCity = idIssuedCity;
 	}
 
 	public String getPlannedStay() {

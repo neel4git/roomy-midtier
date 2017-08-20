@@ -23,7 +23,7 @@ public class HotelDetails implements Serializable {
 	private String phone;
 	private String email;
 	private String website;
-	private String pics;
+	private List<String> pics;
 
 	public int getHotelId() {
 		return hotelId;
@@ -121,11 +121,11 @@ public class HotelDetails implements Serializable {
 		this.website = website;
 	}
 
-	public String getPics() {
+	public List<String> getPics() {
 		return pics;
 	}
 
-	public void setPics(String pics) {
+	public void setPics(List<String> pics) {
 		this.pics = pics;
 	}
 

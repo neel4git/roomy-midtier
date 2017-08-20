@@ -10,33 +10,41 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 @Entity(name = "Hotel_Info")
-public class Hotel_Info implements Serializable{
-	
-	
+public class Hotel_Info implements Serializable {
+
 	@Transient
 	private static final long serialVersionUID = -112950002831333869L;
-	
-	@OneToOne (cascade=CascadeType.ALL, mappedBy="hotel_Info")
+
+	@OneToOne(cascade = CascadeType.ALL, mappedBy = "hotel_Info")
 	private Hotel_Master hotel_Master;
-	
+
 	@Id
 	@Column(name = "Hotel_Id", unique = true)
 	private int hotel_Id;
-	
+
 	@Column(name = "Hotel_Type")
 	private String hotel_type;
 
 	@Column(name = "MAXIMUM_OCCUPENCY")
-	private int  maximum_Occupency;
-	
-	@Column(name="STAR_RATING_BY_HOTEL")
+	private int maximum_Occupency;
+
+	@Column(name = "STAR_RATING_BY_HOTEL")
 	private String star_Rating_By_Hotel;
+
+	@Column(name = "HOTEL_PIC_PATH")
+	private String hotelLogo;
+
+	public String getHotelLogo() {
+		return hotelLogo;
+	}
+
+	public void setHotelLogo(String hotelLogo) {
+		this.hotelLogo = hotelLogo;
+	}
 
 	@Transient
 	private String aminities;
-	
-	
-	
+
 	public String getAminities() {
 		return aminities;
 	}
@@ -76,5 +84,5 @@ public class Hotel_Info implements Serializable{
 	public void setStar_Rating_By_Hotel(String star_Rating_By_Hotel) {
 		this.star_Rating_By_Hotel = star_Rating_By_Hotel;
 	}
-	
+
 }

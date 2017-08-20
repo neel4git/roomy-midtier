@@ -29,7 +29,7 @@ public class DashBoardCustomerDetails {
 
 	@RequestMapping(value = "/getCustomers", method = RequestMethod.POST, produces = "application/json")
 	public Object getDashBoardCustomers(@RequestParam(value = "hotel_id", required = true) String hotel_id,
-			@RequestParam(value = "previousBookings", required = false) int previousBookingsIntervalDays) {
+			@RequestParam(value = "previousBookings", required = true) int previousBookingsIntervalDays) {
 		Response dashBoardCustomerDetails = null;
 		try {
 			List<Object[]> dashboardUserDeatils = userPobyteJdbc.gteBookingsHistroy(hotel_id,

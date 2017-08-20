@@ -72,6 +72,17 @@ public class Hotel_Master implements Serializable {
 	@OneToMany(mappedBy = "hotelMaster", cascade = CascadeType.ALL, targetEntity = Hotel_Pricing_Info.class, fetch = FetchType.EAGER)
 	private List<Hotel_Pricing_Info> pricinginfo;
 
+	@OneToMany(mappedBy = "hotelMaster", cascade = CascadeType.ALL, targetEntity = HotelPhotos.class, fetch = FetchType.LAZY)
+	private List<HotelPhotos> hotelPics;
+
+	public List<HotelPhotos> getHotelPics() {
+		return hotelPics;
+	}
+
+	public void setHotelPics(List<HotelPhotos> hotelPics) {
+		this.hotelPics = hotelPics;
+	}
+
 	public List<Hotel_Pricing_Info> getPricinginfo() {
 		return pricinginfo;
 	}

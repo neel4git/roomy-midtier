@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.Roomy.Response.Domain.HotelDetails;
 import com.Roomy.Response.Domain.UserDetails;
+import com.Roomy.domain.HotelPhotos;
 import com.Roomy.domain.Hotel_Master;
 import com.Roomy.domain.Response;
 import com.Roomy.domain.ResponseStatus;
@@ -21,7 +22,7 @@ public class ResponseBuilder {
 		HotelDetails hotelDetails = new HotelDetails();
 		hotelDetails.setHotelId(hotel.getHotel_Id());
 		hotelDetails.setHotelName(hotel.getHotel_Name());
-		hotelDetails.setLogo("");
+		hotelDetails.setLogo(hotel.getHotel_Info().getHotelLogo());
 		hotelDetails.setHotelDescription(hotel.getHotel_Description());
 		hotelDetails.setAmenities(null);
 		hotelDetails.setStars(hotel.getHotel_Info().getStar_Rating_By_Hotel());
@@ -37,7 +38,14 @@ public class ResponseBuilder {
 		hotelDetails.setPhone(hotel.getContact_No1());
 		hotelDetails.setEmail("");
 		hotelDetails.setWebsite(hotel.getWeb_site());
-		hotelDetails.setPics("");
+		List<HotelPhotos> listOfHotelPhotos = hotel.getHotelPics();
+		List<String> hotelPicPaths = new ArrayList<String>();
+		if (listOfHotelPhotos != null && !listOfHotelPhotos.isEmpty()) {
+			for (HotelPhotos hotelPhotos : listOfHotelPhotos) {
+				hotelPicPaths.add(hotelPhotos.getPicUrl());
+			}
+		}
+		hotelDetails.setPics(hotelPicPaths);
 		return hotelDetails;
 	}
 
@@ -105,21 +113,21 @@ public class ResponseBuilder {
 
 			for (Object[] customer : dashboardUserDeatils) {
 				roomReservedCustomerDetails = new RoomReservedCustomerDetails();
-				roomReservedCustomerDetails.setPhone(validateData(customer[0]));
-				roomReservedCustomerDetails.setEmail(validateData(customer[1]));
-				roomReservedCustomerDetails
-						.setCustomerName(validateData(customer[2] + " " + customer[3] + "" + customer[4]));
-				roomReservedCustomerDetails.setCheckInDate(validateData(customer[6]));
-				roomReservedCustomerDetails.setCheckOutDate(validateData(customer[7]));
-				roomReservedCustomerDetails.setDob(validateData(customer[9]));
-				roomReservedCustomerDetails.setProof(validateData(customer[10] + "," + customer[11]));
-				roomReservedCustomerDetails.setUserPic(validateData(customer[12]));
-				// Pending
-				roomReservedCustomerDetails.setCustomerId(validateData(""));
-				roomReservedCustomerDetails.setPlannedStay(validateData(""));
-				roomReservedCustomerDetails.setMinPrice(validateData(""));
-				roomReservedCustomerDetails.setPaymentMode(validateData(""));
-				roomReservedCustomerDetails.setStatus(validateData(""));
+
+				roomReservedCustomerDetails.setCustomerId(validateData(customer[0]));
+				roomReservedCustomerDetails.setPhone(validateData(customer[1]));
+				roomReservedCustomerDetails.setEmail(validateData(customer[2]));
+				roomReservedCustomerDetails.setCustomerName(validateData(customer[3] + " " + customer[5]));
+				roomReservedCustomerDetails.setDob(validateData(customer[6]));
+				roomReservedCustomerDetails.setIdCardType(validateData(customer[7]));
+				roomReservedCustomerDetails.setIdIssuedCity(validateData(customer[9] + ":" + customer[8]));
+				roomReservedCustomerDetails.setCheckInDate(validateData(customer[12]));
+				roomReservedCustomerDetails.setCheckOutDate(validateData(customer[14]));
+				roomReservedCustomerDetails.setUserPic(validateData(customer[10]));
+				roomReservedCustomerDetails.setPlannedStay(validateData(customer[15]));
+				roomReservedCustomerDetails.setMinPrice(validateData(customer[16]));
+				roomReservedCustomerDetails.setPaymentMode(validateData(customer[17]));
+				roomReservedCustomerDetails.setStatus(validateData(customer[18]));
 				roomReservedCustomerList.add(roomReservedCustomerDetails);
 
 			}
