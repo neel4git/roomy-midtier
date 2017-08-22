@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Configuration
-@EnableWebMvc
+//@EnableWebMvc
 public class WebConfiguration extends WebMvcConfigurerAdapter {
 	/*
 	 * @Bean ServletRegistrationBean h2servletRegistration() {
@@ -15,8 +15,8 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 	 * registrationBean; }
 	 */
 
-	@Override
-	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**");
-	}
+	/*
+	 * @Override public void addCorsMappings(CorsRegistry registry) {
+	 * registry.addMapping("/**"); }
+	 */
 }
