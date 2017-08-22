@@ -14,9 +14,9 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 	 * WebServlet()); registrationBean.addUrlMappings("/console/*"); return
 	 * registrationBean; }
 	 */
-
+/*
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 		registry.addMapping("/**");
-	}
+	}*/
 }
