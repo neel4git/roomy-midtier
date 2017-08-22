@@ -6,7 +6,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 @Configuration
-//@EnableWebMvc
+@EnableWebMvc
 public class WebConfiguration extends WebMvcConfigurerAdapter {
 	/*
 	 * @Bean ServletRegistrationBean h2servletRegistration() {
@@ -15,8 +15,10 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 	 * registrationBean; }
 	 */
 
-	/*
-	 * @Override public void addCorsMappings(CorsRegistry registry) {
-	 * registry.addMapping("/**"); }
-	 */
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		registry.addMapping("/**").allowedOrigins("https://dashboard.pobyt.co").allowedMethods("GET","PUT", "DELETE")
+				.allowedHeaders("header1", "header2", "header3").exposedHeaders("header1", "header2")
+				.allowCredentials(false).maxAge(3600);
+	}
 }
