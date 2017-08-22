@@ -22,8 +22,7 @@ public class SwaggerCrosFilter implements Filter {
 		reponse.setHeader("Acess-Control-Allow-Origin", "*");
 		reponse.setHeader("Acess-Control-Allow-Methods", "GET,POST,PUT,DELETE");
 		reponse.setHeader("Acess-Control-Max-Age", "3600");
-		// reponse.setHeader("Acess-Control-Allow-Headers","x-requested-with,Content-Type");
-		reponse.setHeader("Acess-Control-Allow-Headers", "Origin, Content-Type, X-Auth-Token");
+		reponse.setHeader("Acess-Control-Allow-Headers", "x-requested-with,Content-Type");
 		reponse.setHeader("Cache-Control", "no-cache,no-store,must-revalidate");
 		reponse.setHeader("Pragma", "np-cache");
 		reponse.setHeader("Expires", "0");
