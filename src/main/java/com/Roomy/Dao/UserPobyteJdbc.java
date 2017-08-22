@@ -79,7 +79,7 @@ public class UserPobyteJdbc {
 		/*
 		 * if Mobile Number is missing Take the EmailID
 		 */
-		if (loginRequest.getMobileNumber() != null &&  loginRequest.getMobileNumber().trim().length()>0) {
+		if (loginRequest.getMobileNumber() != null && loginRequest.getMobileNumber().trim().length() > 0) {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getMobileNumber());
 		} else {
 			sp.setParameter("LOGIN_DETAIL", loginRequest.getEmailId());
@@ -102,6 +102,7 @@ public class UserPobyteJdbc {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Object[]> gteBookingsHistroy(String hotelID, int lastBookingsinDays) throws SQLException {
+		LOGGER.info("Entered into gteBookingsHistroy");
 		boolean bookingsFound = Boolean.FALSE;
 		List<Object[]> bookingsHistroy = null;
 		StoredProcedureQuery bookingsHistroySP = entityManager.createStoredProcedureQuery("GET_RESERVATIONS_BY_HOTEL");
