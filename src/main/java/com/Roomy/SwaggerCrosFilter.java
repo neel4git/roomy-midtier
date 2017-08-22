@@ -19,7 +19,7 @@ public class SwaggerCrosFilter implements Filter {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
 			throws IOException, ServletException {
 		HttpServletResponse reponse = (HttpServletResponse) res;
-		reponse.setHeader("Acess-Control-Allow-Origin", "*");
+		reponse.setHeader("Acess-Control-Allow-Origin", "https://dashboard.pobyt.co");
 		reponse.setHeader("Acess-Control-Allow-Methods", "GET,POST,PUT,DELETE");
 		reponse.setHeader("Acess-Control-Max-Age", "3600");
 		reponse.setHeader("Acess-Control-Allow-Headers", "*");
