@@ -7,17 +7,14 @@ public class UserRequest implements Serializable {
 	int userId;
 	String emailId;
 	String conactNumber;
-	String pasword;
-	String Name;
-	String userType;
+	String password;
+	String name;
 	String dob;
 	String token;
-	String serviceType;
 	String action;
 	String gender;
 	String otp;
-	String type;
-	
+	String loginType;
 	public int getUserId() {
 		return userId;
 	}
@@ -36,23 +33,17 @@ public class UserRequest implements Serializable {
 	public void setConactNumber(String conactNumber) {
 		this.conactNumber = conactNumber;
 	}
-	public String getPasword() {
-		return pasword;
+	public String getPassword() {
+		return password;
 	}
-	public void setPasword(String pasword) {
-		this.pasword = pasword;
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	public String getName() {
-		return Name;
+		return name;
 	}
 	public void setName(String name) {
-		Name = name;
-	}
-	public String getUserType() {
-		return userType;
-	}
-	public void setUserType(String userType) {
-		this.userType = userType;
+		this.name = name;
 	}
 	public String getDob() {
 		return dob;
@@ -65,12 +56,6 @@ public class UserRequest implements Serializable {
 	}
 	public void setToken(String token) {
 		this.token = token;
-	}
-	public String getServiceType() {
-		return serviceType;
-	}
-	public void setServiceType(String serviceType) {
-		this.serviceType = serviceType;
 	}
 	public String getAction() {
 		return action;
@@ -90,11 +75,11 @@ public class UserRequest implements Serializable {
 	public void setOtp(String otp) {
 		this.otp = otp;
 	}
-	public String getType() {
-		return type;
+	public String getLoginType() {
+		return loginType;
 	}
-	public void setType(String type) {
-		this.type = type;
+	public void setLoginType(String loginType) {
+		this.loginType = loginType;
 	}
-		
+	
 }

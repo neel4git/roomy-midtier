@@ -55,16 +55,17 @@ public class UserServices {
 	public Response userRegisterAndAuth(@RequestBody UserRequest userRequest) throws Exception {
 		try{
 		// Register module
-		if(userRequest.getAction().equals("SignUp") || userRequest.getAction().equals("FBM")
-				|| userRequest.getAction().equals("GM") || userRequest.getAction().equals("FB")
-				|| userRequest.getAction().equals("GA")){
+			int OTPAuth = RoomyUtil.generateOTP();
+		if(userRequest.getAction().equals("signup") || userRequest.getAction().equals("fbm")
+				|| userRequest.getAction().equals("gm") || userRequest.getAction().equals("fb")
+				|| userRequest.getAction().equals("ga")){
 		responseMessage = userPobyteJdbc.userRegistration(userRequest);
 		if(responseMessage.getStatus().equals("0001")){
-			int OTPAuth = RoomyUtil.generateOTP();
+			
 			int userId = (int)responseMessage.getResult();
 			userRequest.setUserId(userId);
 			
-			if( userRequest.getAction().equals("FB") || userRequest.getAction().equals("GA")){
+			if( userRequest.getAction().equals("fb") || userRequest.getAction().equals("ga")){
 				responseMessage = new Response("0001", null, generateCustomerToken(userRequest, OTPAuth),userPobyteJdbc.getUserprofileById(userId));
 			}else{
 				responseMessage = new Response("0009", null, generateCustomerToken(userRequest, OTPAuth),OTPAuth);	
@@ -81,7 +82,7 @@ public class UserServices {
 		}
 		}
 		//OTP module
-			if(userRequest.getAction().equals("OTP")){
+			if(userRequest.getAction().equals("otp")){
 				SourceKeyRing sourceKeyRing = decryptyToken(userRequest.getToken());
 				// if otp didnot matched
 				if (userRequest.getOtp().equals(sourceKeyRing.getOtp())) {
@@ -98,10 +99,22 @@ public class UserServices {
 				}
 			}
 		//Sign in Module
-			if(userRequest.getAction().equals("SignIn")){
+			if(userRequest.getAction().equals("signin")){
 				responseMessage = userPobyteJdbc.userLogin(userRequest);
 			if(responseMessage.getStatus().equals("0001")){
-				responseMessage = new Response("0001", null,userRequest.getToken(), responseMessage.getResult());
+				if(userRequest.getLoginType().equals("web")){
+				Object result =  responseMessage.getResult();
+				String token = generateCustomerToken(userRequest, OTPAuth);
+				if (userRequest.getConactNumber() != null) {
+					userPobyteJdbc.updateToken(userRequest.getConactNumber(), token);	
+				} else {
+					userPobyteJdbc.updateToken(userRequest.getEmailId(), token);
+				}
+				
+				responseMessage = new Response("0001", null,token, result);
+				}else{
+					responseMessage = new Response("0001", null,userRequest.getToken(), responseMessage.getResult());
+				}
 			}else{
 				responseMessage = new Response(responseMessage.getStatus(), null,null, null);
 			}

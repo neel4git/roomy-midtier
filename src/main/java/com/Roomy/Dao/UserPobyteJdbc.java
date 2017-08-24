@@ -144,11 +144,11 @@ public class UserPobyteJdbc {
 
 			sp.setParameter("EMAIL_ADDRESS", userRequest.getEmailId());
 			sp.setParameter("CONTACT_NUMBER", userRequest.getConactNumber());
-			sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPasword()));
+			sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPassword()));
 			sp.setParameter("FIRST_NAME", userRequest.getName());
 			sp.setParameter("MIDDLE_NAME", "");
 			sp.setParameter("LAST_NAME", "");
-			sp.setParameter("USER_TYPE", userRequest.getUserType());
+			sp.setParameter("USER_TYPE", "Normal");
 			sp.setParameter("GENDER", userRequest.getGender());
 
 			boolean exist = sp.execute();
@@ -191,7 +191,33 @@ public class UserPobyteJdbc {
 		}
 		return responseMessage;
 	}
+	
 
+	public Response updateToken(String result,String token) {
+		try {
+
+			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_TOKEN");
+			sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("TOKEN", String.class, ParameterMode.IN);
+			sp.setParameter("LOGIN_DETAIL", result);
+			sp.setParameter("TOKEN", token);
+			
+			boolean exist = sp.execute();
+			if (exist == true) {
+				List<Object[]> resultList = sp.getResultList();
+				if (resultList.size() > 0 && resultList.contains("Success")) {
+					responseMessage = new Response("0001", null);// Successfully updated
+				} else {
+					responseMessage = new Response("0004", null);// Not updated successfully
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.info("UserpobytJDBC :: updateuserStatus", e);
+		}
+		return responseMessage;
+	}
+
+	
 	public Response userLogin(UserRequest userRequest) throws Exception {
 
 		UserDetails userDetails = null;
@@ -201,21 +227,22 @@ public class UserPobyteJdbc {
 		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("LOGIN_TYPE", String.class, ParameterMode.IN);
 
-		if (userRequest.getType().equals("WEB")) {
+		if (userRequest.getLoginType().equals("web")) {
 			if (userRequest.getConactNumber() != null) {
 				sp.setParameter("LOGIN_DETAIL", userRequest.getConactNumber());
 			} else {
 				sp.setParameter("LOGIN_DETAIL", userRequest.getEmailId());
 			}
-			sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPasword()));
+			sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPassword()));
 		}
 
-		if (userRequest.getType().equals("TOKEN")) {
+		if (userRequest.getLoginType().equals("token")) {
 
 			sp.setParameter("LOGIN_DETAIL", userRequest.getToken());
+			sp.setParameter("LOGIN_PASSWORD", "");
 		}
 
-		sp.setParameter("LOGIN_TYPE", userRequest.getType());
+		sp.setParameter("LOGIN_TYPE", userRequest.getLoginType());
 		boolean exist = sp.execute();
 		if (exist == true) {
 			List<Object[]> resultList = sp.getResultList();
