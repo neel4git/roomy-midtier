@@ -1,21 +1,20 @@
 package com.Roomy.domain;
 
-import com.Roomy.Request.Domain.UserRegistrationRequest;
+import com.Roomy.Request.Domain.UserRequest;
 
 
 public class SourceKeyRing {
-	private UserRegistrationRequest registrationRequest;
+	private UserRequest userRequest;
 	private int otp;
 	private String otpIssuedTime;
 
 	
-
-	public UserRegistrationRequest getRegistrationRequest() {
-		return registrationRequest;
+	public UserRequest getUserRequest() {
+		return userRequest;
 	}
 
-	public void setRegistrationRequest(UserRegistrationRequest registrationRequest) {
-		this.registrationRequest = registrationRequest;
+	public void setUserRequest(UserRequest userRequest) {
+		this.userRequest = userRequest;
 	}
 
 	public int getOtp() {

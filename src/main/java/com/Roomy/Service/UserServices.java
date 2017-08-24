@@ -21,9 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Roomy.Dao.UserPobyteJdbc;
-import com.Roomy.Request.Domain.AutheticateUserRequest;
-import com.Roomy.Request.Domain.LoginRequest;
-import com.Roomy.Request.Domain.UserRegistrationRequest;
+import com.Roomy.Request.Domain.HotelsbyLocationRequest;
+import com.Roomy.Request.Domain.UserRequest;
 import com.Roomy.Response.Domain.HotelsListByRadius;
 import com.Roomy.Response.Domain.UserDetails;
 import com.Roomy.Util.AESEncryptionUtil;
@@ -32,7 +31,6 @@ import com.Roomy.Util.RoomyUtil;
 import com.Roomy.domain.Response;
 import com.Roomy.domain.ResponseStatus;
 import com.Roomy.domain.SourceKeyRing;
-import com.Roomy.domain.UserMaster;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -43,176 +41,81 @@ import com.nimbusds.jwt.JWTClaimsSet;
 @RestController
 public class UserServices {
 
-	public Response responseMessage;
+	
 
 	@Autowired
 	EntityManager entityManager;
-
 	@Autowired
 	AESEncryptionUtil aESEncryptionUtil;
-
-	public UserPobyteJdbc userPobyteJdbc;
-
-	
-	
+	@Autowired
+	UserPobyteJdbc userPobyteJdbc;
+	public Response responseMessage;
 	
 	@RequestMapping(value = "/userRegistration", method = RequestMethod.POST, produces = "application/json")
-	public Response userRegistration(@RequestBody UserRegistrationRequest userRegistrationRequest) throws Exception {
-		
-		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_REGISTRATION");
-		sp.registerStoredProcedureParameter("REGISTRATION_TYPE", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("EMAIL_ADDRESS", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("FIRST_NAME", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("USER_TYPE", String.class, ParameterMode.IN);
-				
-		sp.setParameter("REGISTRATION_TYPE", userRegistrationRequest.getRegistrationType());
-		sp.setParameter("EMAIL_ADDRESS", userRegistrationRequest.getEmailId());
-		sp.setParameter("CONTACT_NUMBER", userRegistrationRequest.getConactNumber());
-		sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRegistrationRequest.getPasword()));
-		sp.setParameter("FIRST_NAME", userRegistrationRequest.getName());
-		sp.setParameter("USER_TYPE", userRegistrationRequest.getUserType());
-		boolean exist = sp.execute();
-		if (exist == true) {
-			List<Object[]> resultList = sp.getResultList();
-			if (resultList.size() > 0 && resultList.contains("Success")) {
-				int OTPAuth = RoomyUtil.generateOTP();
-				responseMessage = new Response(ResponseStatus.SUCCESS_CODE, null, generateCustomerToken(userRegistrationRequest, OTPAuth),
-						OTPAuth);
-				return responseMessage;
-			}
-			if (resultList.size() > 0 && resultList.contains("Failure:ContactNumberExists")) {
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE, "Mobile Number is already register,Please login", null, null);
-				return responseMessage;
-			}
-			if (resultList.size() > 0 && resultList.contains("Failure:EmailAddressExists")) {
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE, "Email Id is already register,Please login", null, null);
-				return responseMessage;
-			}
-		}
-		return responseMessage;
-	}
-	
-	@RequestMapping(value = "/authenticateUser", method = RequestMethod.POST)
-	public Object authenticateUser(@RequestBody AutheticateUserRequest autheticateUserRequest) {
-	
-		try {
-			SourceKeyRing sourceKeyRing = decryptyToken(autheticateUserRequest.getCustomerToken());
-			// if otp didnot matched
-			if (autheticateUserRequest.getOtp().equals(sourceKeyRing.getOtp())) {
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.WRONG_OTP_EXCEPTION,
-						autheticateUserRequest.getCustomerToken(), null);
-			}
-			// if OTP issued time is excceded greater than 15 minutes
-			else if (RoomyUtil.getOtpIssueTimeDiffrence(sourceKeyRing.getOtpIssuedTime()) > 15) {
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.OTP_EXPIRED_EXCEPTION,
-						autheticateUserRequest.getCustomerToken(), null);
-			} else {
-				//sp
-				StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_STATUS");
-				sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
-				sp.setParameter("CONTACT_NUMBER", sourceKeyRing.getRegistrationRequest().getConactNumber());
-				boolean exist = sp.execute();
-				if (exist == true) {
-					List<Object[]> resultList = sp.getResultList();
-					if (resultList.size() > 0 && resultList.contains("Success")) {
-					responseMessage = new Response(ResponseStatus.SUCCESS_CODE, "User Registered Sucessfully",
-							autheticateUserRequest.getCustomerToken(), null);
-				} else {
-					responseMessage = new Response(ResponseStatus.FAILURE_CODE, "User Already Registered Please login",
-							autheticateUserRequest.getCustomerToken(), null);
-				}
-			}
-			}
-		}
-		 catch (Exception exception) {
+	public Response userRegisterAndAuth(@RequestBody UserRequest userRequest) throws Exception {
+		try{
+		// Register module
+		if(userRequest.getAction().equals("SignUp") || userRequest.getAction().equals("FBM")
+				|| userRequest.getAction().equals("GM") || userRequest.getAction().equals("FB")
+				|| userRequest.getAction().equals("GA")){
+		responseMessage = userPobyteJdbc.userRegistration(userRequest);
+		if(responseMessage.getStatus().equals("0001")){
+			int OTPAuth = RoomyUtil.generateOTP();
+			int userId = (int)responseMessage.getResult();
+			userRequest.setUserId(userId);
 			
-			responseMessage = new Response(ResponseStatus.FAILURE_CODE,
-					"Some Exception occurred in processing the authenticateUser Service",
-					autheticateUserRequest.getCustomerToken(), null);
-		}
-		return responseMessage;
-	}
-	
-	
-	@RequestMapping(value = "/userLogin", method = RequestMethod.POST, produces = "application/json")
-	public Response userLogin(@RequestBody LoginRequest loginRequest) throws Exception {
-
-		UserDetails userDetails = null;
-		List<Object> response = new ArrayList<>();
-		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_LOGIN");
-		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("LOGIN_TYPE", String.class, ParameterMode.IN);
-
-		if(loginRequest.getLoginType().equals("CREDENTIALS")){
-		if (loginRequest.getMobileNumber() != null) {
-			sp.setParameter("LOGIN_DETAIL", loginRequest.getMobileNumber());
-		} else {
-			sp.setParameter("LOGIN_DETAIL", loginRequest.getEmailId());
-		}
-		}else{
-			sp.setParameter("LOGIN_DETAIL",loginRequest.getJwtToken());
-		}
-		sp.setParameter("LOGIN_TYPE", loginRequest.getLoginType());
-		sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(loginRequest.getPassword()));
-
-		boolean exist = sp.execute();
-		if (exist == true) {
-			List<Object[]> resultList = sp.getResultList();
-			if (resultList.size() > 0 && resultList.contains("Failure:WrongCredentials")) {
-				userDetails = new UserDetails();
-				userDetails.setResponse("Failure:WrongCredentials");
-				response.add(userDetails);
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE, userDetails.getResponse(), null, null);
-				return responseMessage;
-
-			} else if (resultList.size() > 0 && resultList.contains("Failure:InactiveOrSuspendedUser")) {
-				userDetails = new UserDetails();
-				userDetails.setResponse("Failure:InactiveOrSuspendedUser");
-				response.add(userDetails);
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE, userDetails.getResponse(), null, null);
-				return responseMessage;
-
-			} else {
-
-				for (Object[] result : resultList) {
-					userDetails = new UserDetails();
-					userDetails.setResponse(result[0]);
-					userDetails.setUserID(result[1]);
-					userDetails.setContactNumber(result[2]);
-					userDetails.setEmailAddress(result[3]);
-					userDetails.setFirst_Name(result[4]);
-					userDetails.setMidle_Name(result[5]);
-					userDetails.setLast_Name(result[6]);
-					userDetails.setUser_type(result[7]);
-					userDetails.setMemberShip_type(result[8]);
-					userDetails.setIdentityCardType(result[9]);
-					userDetails.setIdentityCardNumber(result[10]);
-					userDetails.setCompanyName(result[11]);
-					userDetails.setEmergencyContactNumber1(result[12]);
-					userDetails.setEmergencyContactNumber2(result[13]);
-					userDetails.setDateOfBirth(result[14]);
-					userDetails.setCityPrefrence(result[15]);
-					userDetails.setSmsNotificationPrefrences(result[16]);
-					userDetails.setEmailNotificationPrefrences(result[17]);
-					userDetails.setUserStatus(result[18]);
-					userDetails.setUserTokenValue(result[19]);
-
-					response.add(userDetails);
-					responseMessage = new Response(ResponseStatus.SUCCESS_CODE, null, null, userDetails);
-				}
-
+			if( userRequest.getAction().equals("FB") || userRequest.getAction().equals("GA")){
+				responseMessage = new Response("0001", null, generateCustomerToken(userRequest, OTPAuth),userPobyteJdbc.getUserprofileById(userId));
+			}else{
+				responseMessage = new Response("0009", null, generateCustomerToken(userRequest, OTPAuth),OTPAuth);	
 			}
-
-		} else {
-			responseMessage = new Response(ResponseStatus.FAILURE_CODE, "No Records found", null, "");
+			
+		}else{
+			if(responseMessage.getStatusMessage().equals("0002")){
+				responseMessage = new Response(0002, null, null,null);
+			}else{
+				if(responseMessage.getStatus().equals("0003")){
+					responseMessage = new Response(0003, null, null,null);
+				}
+			}
 		}
-
+		}
+		//OTP module
+			if(userRequest.getAction().equals("OTP")){
+				SourceKeyRing sourceKeyRing = decryptyToken(userRequest.getToken());
+				// if otp didnot matched
+				if (userRequest.getOtp().equals(sourceKeyRing.getOtp())) {
+					responseMessage = new Response("0007", null,userRequest.getToken(), null);
+				}
+				// if OTP issued time is excceded greater than 15 minutes
+				else if (RoomyUtil.getOtpIssueTimeDiffrence(sourceKeyRing.getOtpIssuedTime()) > 15) {
+					responseMessage = new Response("0008", null,userRequest.getToken(), null);
+				}else{
+					responseMessage =userPobyteJdbc.updateuserStatus(userRequest.getUserId());
+					if(responseMessage.getStatus().equals("0001")){
+						responseMessage = new Response("0001", null,userRequest.getToken(), userPobyteJdbc.getUserprofileById(userRequest.getUserId()));
+					}
+				}
+			}
+		//Sign in Module
+			if(userRequest.getAction().equals("SignIn")){
+				responseMessage = userPobyteJdbc.userLogin(userRequest);
+			if(responseMessage.getStatus().equals("0001")){
+				responseMessage = new Response("0001", null,userRequest.getToken(), responseMessage.getResult());
+			}else{
+				responseMessage = new Response(responseMessage.getStatus(), null,null, null);
+			}
+			}
+		}catch(Exception e){
+			return responseMessage = new Response("0011", null,null, null);
+		}
 		return responseMessage;
 	}
-
+	
+	
+	
+	
+	
 	@RequestMapping(value = "/userLogout", method = RequestMethod.POST, produces = "application/json")
 	public Response userLogout(@RequestParam(value = "userID", required = false) int userID,
 			@RequestParam(value = "jwtToken") String jwtToken) throws JsonProcessingException, SQLException {
@@ -244,11 +147,9 @@ public class UserServices {
 	}
 
 	@RequestMapping(value = "/getHotelsbyLocation", method = RequestMethod.POST, produces = "application/json")
-	public Response getHotels(@RequestParam(value = "user_Latitude") float user_Latitude,
-			@RequestParam(value = "user_Longitude") float user_Longitude, @RequestParam(value = "radius") int radius,
-			@RequestParam(value = "jwtToken") String jwtToken) throws JsonProcessingException, SQLException {
+	public Response getHotels(@RequestBody HotelsbyLocationRequest locationRequest) throws JsonProcessingException, SQLException {
 
-		if (userPobyteJdbc.validateJwtToken(jwtToken)) {
+		if (userPobyteJdbc.validateJwtToken(locationRequest.getJwtToken())) {
 			List<HotelsListByRadius> hotelsListByRadiusList = new ArrayList<HotelsListByRadius>();
 			HotelsListByRadius hotelsListByRadius = new HotelsListByRadius();
 			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("GET_HOTELS_BY_RADIUS");
@@ -256,9 +157,9 @@ public class UserServices {
 			sp.registerStoredProcedureParameter("USER_LONGITUDE", Float.class, ParameterMode.IN);
 			sp.registerStoredProcedureParameter("RADIUS", Integer.class, ParameterMode.IN);
 
-			sp.setParameter("USER_LATITUDE", user_Latitude);
-			sp.setParameter("USER_LONGITUDE", user_Longitude);
-			sp.setParameter("RADIUS", radius);
+			sp.setParameter("USER_LATITUDE", locationRequest.getUser_Latitude());
+			sp.setParameter("USER_LONGITUDE", locationRequest.getUser_Longitude());
+			sp.setParameter("RADIUS", 10);
 			boolean exist = sp.execute();
 			if (exist == true) {
 				List<Object[]> resultList = sp.getResultList();
@@ -284,14 +185,14 @@ public class UserServices {
 					hotelsListByRadiusList.add(hotelsListByRadius);
 				}
 				System.out.println(hotelsListByRadiusList);
-				responseMessage = new Response(ResponseStatus.SUCCESS_CODE, ResponseStatus.SUCESS_MESSAGE, null,
+				responseMessage = new Response("0001", null, locationRequest.getJwtToken(),
 						hotelsListByRadiusList);
 			} else {
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.FAILURE_MESSAGE, null, "");
+				responseMessage = new Response("0010",null , locationRequest.getJwtToken(), "");
 			}
 
 		} else {
-			responseMessage = new Response(ResponseStatus.UNAUTH_ACCESS, "UnAuthrorized access,Please login", "", "");
+			responseMessage = new Response("0011", null, "", "");
 
 		}
 		return responseMessage;
@@ -374,13 +275,13 @@ public class UserServices {
 		return result;
 	}
 	
-	private String generateCustomerToken(UserRegistrationRequest userRegistrationRequest, int OTPAuth) throws JOSEException {
+	private String generateCustomerToken(UserRequest userRequest, int OTPAuth) throws JOSEException {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		// Set the SourceKeyRing vale to generate the Key
 		SourceKeyRing keyRing = new SourceKeyRing();
-		UserRegistrationRequest registrationRequest = userRegistrationRequest;
-		keyRing.setRegistrationRequest(registrationRequest);
+		
+		keyRing.setUserRequest(userRequest);
 		keyRing.setOtp(OTPAuth);
 		keyRing.setOtpIssuedTime(dateFormat.format(date));
 		return JwtKeyUtil.createJWT(keyRing);

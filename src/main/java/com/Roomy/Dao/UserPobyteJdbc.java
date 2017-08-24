@@ -1,6 +1,7 @@
 package com.Roomy.Dao;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -12,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.Roomy.Request.Domain.LoginRequest;
+import com.Roomy.Request.Domain.UserRequest;
+import com.Roomy.Response.Domain.UserDetails;
+import com.Roomy.Util.AESEncryptionUtil;
 import com.Roomy.domain.Response;
 import com.Roomy.domain.ResponseStatus;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,7 +25,10 @@ public class UserPobyteJdbc {
 	private final static Logger LOGGER = Logger.getLogger(UserPobyteJdbc.class.getName());
 	@Autowired
 	EntityManager entityManager;
+	@Autowired
+	AESEncryptionUtil aESEncryptionUtil;
 	public Response responseMessage;
+	public String pB_code = "";
 
 	/*
 	 * This is the method used to validate the Toekn present for the Given User
@@ -120,6 +127,177 @@ public class UserPobyteJdbc {
 			throw new SQLException(exception.getMessage());
 		}
 		return bookingsHistroy;
+	}
+
+	public Response userRegistration(UserRequest userRequest) throws Exception {
+		try {
+
+			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_REGISTRATION");
+			sp.registerStoredProcedureParameter("EMAIL_ADDRESS", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("FIRST_NAME", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("MIDDLE_NAME", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("LAST_NAME", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("USER_TYPE", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("GENDER", String.class, ParameterMode.IN);
+
+			sp.setParameter("EMAIL_ADDRESS", userRequest.getEmailId());
+			sp.setParameter("CONTACT_NUMBER", userRequest.getConactNumber());
+			sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPasword()));
+			sp.setParameter("FIRST_NAME", userRequest.getName());
+			sp.setParameter("MIDDLE_NAME", "");
+			sp.setParameter("LAST_NAME", "");
+			sp.setParameter("USER_TYPE", userRequest.getUserType());
+			sp.setParameter("GENDER", userRequest.getGender());
+
+			boolean exist = sp.execute();
+			if (exist == true) {
+				List<Object[]> resultList = sp.getResultList();
+
+				if (resultList.size() > 0 && resultList.contains("Failure:ContactNumberExists")) {
+					responseMessage = new Response("0002", null);// Contact Number already exit
+				}
+				if (resultList.size() > 0 && resultList.contains("Failure:EmailAddressExists")) {
+					responseMessage = new Response("0003", null);// Email Id already Exist
+				}
+				if (resultList.size() > 0) {
+					responseMessage = new Response("0001", resultList.get(0)); // Success
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.info("UserpobytJDBC :: userRegistration", e);
+		}
+		return responseMessage;
+	}
+
+	public Response updateuserStatus(int userId) {
+		try {
+
+			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_STATUS");
+			sp.registerStoredProcedureParameter("USERID", int.class, ParameterMode.IN);
+			sp.setParameter("USERID", userId);
+			boolean exist = sp.execute();
+			if (exist == true) {
+				List<Object[]> resultList = sp.getResultList();
+				if (resultList.size() > 0 && resultList.contains("Success")) {
+					responseMessage = new Response("0001", null);// Successfully updated
+				} else {
+					responseMessage = new Response("0004", null);// Not updated successfully
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.info("UserpobytJDBC :: updateuserStatus", e);
+		}
+		return responseMessage;
+	}
+
+	public Response userLogin(UserRequest userRequest) throws Exception {
+
+		UserDetails userDetails = null;
+		List<Object> response = new ArrayList<>();
+		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_LOGIN");
+		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("LOGIN_TYPE", String.class, ParameterMode.IN);
+
+		if (userRequest.getType().equals("WEB")) {
+			if (userRequest.getConactNumber() != null) {
+				sp.setParameter("LOGIN_DETAIL", userRequest.getConactNumber());
+			} else {
+				sp.setParameter("LOGIN_DETAIL", userRequest.getEmailId());
+			}
+			sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPasword()));
+		}
+
+		if (userRequest.getType().equals("TOKEN")) {
+
+			sp.setParameter("LOGIN_DETAIL", userRequest.getToken());
+		}
+
+		sp.setParameter("LOGIN_TYPE", userRequest.getType());
+		boolean exist = sp.execute();
+		if (exist == true) {
+			List<Object[]> resultList = sp.getResultList();
+			if (resultList.size() > 0 && resultList.contains("Failure:WrongCredentials")) {
+				responseMessage = new Response("0005", null); // Invalid Username or password
+
+			} else if (resultList.size() > 0 && resultList.contains("Failure:InactiveOrSuspendedUser")) {
+				responseMessage = new Response("0006", null);// Inactive or suspended User
+			} else {
+
+				for (Object[] result : resultList) {
+					userDetails = new UserDetails();
+					userDetails.setResponse(result[0]);
+					userDetails.setUserID(result[1]);
+					userDetails.setContactNumber(result[2]);
+					userDetails.setEmailAddress(result[3]);
+					userDetails.setFirst_Name(result[4]);
+					userDetails.setMidle_Name(result[5]);
+					userDetails.setLast_Name(result[6]);
+					userDetails.setUser_type(result[7]);
+					userDetails.setMemberShip_type(result[8]);
+					userDetails.setIdentityCardType(result[9]);
+					userDetails.setIdentityCardNumber(result[10]);
+					userDetails.setCompanyName(result[11]);
+					userDetails.setEmergencyContactNumber1(result[12]);
+					userDetails.setEmergencyContactNumber2(result[13]);
+					userDetails.setDateOfBirth(result[14]);
+					userDetails.setCityPrefrence(result[15]);
+					userDetails.setSmsNotificationPrefrences(result[16]);
+					userDetails.setEmailNotificationPrefrences(result[17]);
+					userDetails.setUserStatus(result[18]);
+					userDetails.setUserTokenValue(result[19]);
+
+					response.add(userDetails);
+					responseMessage = new Response("0001", userDetails);
+				}
+
+			}
+
+		}
+
+		return responseMessage;
+	}
+
+	public UserDetails getUserprofileById(int userId) {
+		UserDetails userDetails = null;
+		List<Object> response = new ArrayList<>();
+		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("GET_USER_PROFILE_BY_ID");
+		sp.registerStoredProcedureParameter("USER_ID", Integer.class, ParameterMode.IN);
+		sp.setParameter("USER_ID", userId);
+
+		boolean exist = sp.execute();
+		if (exist == true) {
+			List<Object[]> resultList = sp.getResultList();
+			for (Object[] result : resultList) {
+				userDetails = new UserDetails();
+				userDetails.setResponse(result[0]);
+				userDetails.setUserID(result[1]);
+				userDetails.setContactNumber(result[2]);
+				userDetails.setEmailAddress(result[3]);
+				userDetails.setFirst_Name(result[4]);
+				userDetails.setMidle_Name(result[5]);
+				userDetails.setLast_Name(result[6]);
+				userDetails.setUser_type(result[7]);
+				userDetails.setMemberShip_type(result[8]);
+				userDetails.setIdentityCardType(result[9]);
+				userDetails.setIdentityCardNumber(result[10]);
+				userDetails.setCompanyName(result[11]);
+				userDetails.setEmergencyContactNumber1(result[12]);
+				userDetails.setEmergencyContactNumber2(result[13]);
+				userDetails.setDateOfBirth(result[14]);
+				userDetails.setCityPrefrence(result[15]);
+				userDetails.setSmsNotificationPrefrences(result[16]);
+				userDetails.setEmailNotificationPrefrences(result[17]);
+				userDetails.setUserStatus(result[18]);
+				userDetails.setUserTokenValue(result[19]);
+
+				response.add(userDetails);
+
+			}
+		}
+		return userDetails;
 	}
 
 }
