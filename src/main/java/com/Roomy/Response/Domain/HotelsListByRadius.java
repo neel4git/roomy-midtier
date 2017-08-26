@@ -24,6 +24,14 @@ public class HotelsListByRadius implements Serializable{
 	private Object hotel_type;
 	private Object  maximum_Occupency;
 	private Object star_Rating_By_Hotel;
+	private Object hotel_pic_path;
+	private Object pricePerMin;
+	private Object maintenancePerMin;
+	private Object minDuration;
+	private Object currencyType;
+	private Object isAviablity;
+	
+	
 	public Object getHotel_id() {
 		return hotel_id;
 	}
@@ -131,6 +139,42 @@ public class HotelsListByRadius implements Serializable{
 	}
 	public void setStar_Rating_By_Hotel(Object star_Rating_By_Hotel) {
 		this.star_Rating_By_Hotel = star_Rating_By_Hotel;
+	}
+	public Object getHotel_pic_path() {
+		return hotel_pic_path;
+	}
+	public void setHotel_pic_path(Object hotel_pic_path) {
+		this.hotel_pic_path = hotel_pic_path;
+	}
+	public Object getPricePerMin() {
+		return pricePerMin;
+	}
+	public void setPricePerMin(Object pricePerMin) {
+		this.pricePerMin = pricePerMin;
+	}
+	public Object getMaintenancePerMin() {
+		return maintenancePerMin;
+	}
+	public void setMaintenancePerMin(Object maintenancePerMin) {
+		this.maintenancePerMin = maintenancePerMin;
+	}
+	public Object getMinDuration() {
+		return minDuration;
+	}
+	public void setMinDuration(Object minDuration) {
+		this.minDuration = minDuration;
+	}
+	public Object getCurrencyType() {
+		return currencyType;
+	}
+	public void setCurrencyType(Object currencyType) {
+		this.currencyType = currencyType;
+	}
+	public Object getIsAviablity() {
+		return isAviablity;
+	}
+	public void setIsAviablity(Object isAviablity) {
+		this.isAviablity = isAviablity;
 	}
 	
 	

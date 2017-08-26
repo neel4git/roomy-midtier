@@ -19,10 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.Roomy.Dao.UserPobyteJdbc;
 import com.Roomy.Repository.Hotel_InfoRepository;
 import com.Roomy.Repository.Hotel_MasterRepository;
+import com.Roomy.Request.Domain.HotelDetailsRequest;
 import com.Roomy.Request.Domain.HotelsbyLocationRequest;
+import com.Roomy.Response.Domain.HotelDetailsbyIdResponse;
 import com.Roomy.Response.Domain.HotelsBasedOnCityResponse;
 import com.Roomy.Response.Domain.HotelsListByRadius;
-import com.Roomy.domain.Hotel_Info;
 import com.Roomy.domain.Hotel_Master;
 import com.Roomy.domain.Response;
 import com.Roomy.domain.ResponseStatus;
@@ -44,7 +45,7 @@ public class HotelServices {
 	@Autowired
 	UserPobyteJdbc userPobyteJdbc;
 
-	@RequestMapping(value = "/getHotels", method = RequestMethod.POST, produces = "application/json")
+	@RequestMapping(value = "/getHotelsByCity", method = RequestMethod.POST, produces = "application/json")
 	public Object getHotelsBasedonCity(@RequestParam(value = "cityName", required = true) String cityName,
 			@RequestParam(value = "customerToken") String customerToken) throws JsonProcessingException {
 		try {
@@ -70,20 +71,51 @@ public class HotelServices {
 	}
 
 	@RequestMapping(value = "/getHotelDetails", method = RequestMethod.POST, produces = "application/json")
-	public Object getHotelDetails(@RequestParam(value = "hotel_id", required = true) int hotel_id,
-			@RequestParam(value = "customerToken") String customerToken) throws JsonProcessingException, SQLException{
-		List<Hotel_Info> hotel_InfoList = new ArrayList<Hotel_Info>();
+	public Object getHotelDetails(@RequestBody HotelDetailsRequest hotelDetailsRequest) throws JsonProcessingException, SQLException{
 		try {
-			Hotel_Info hotel_Info = hotel_InfoRepository.getHotelInfo(hotel_id);
-			if (hotel_Info != null) {
-				hotel_Info.setAminities("Wi-Fi,AC,Car Parking,Gym,SwimmingPool");
-				hotel_InfoList.add(hotel_Info);
-				responseMessage = new Response("0001", null, customerToken, hotel_InfoList);
-			} else {
-				responseMessage = new Response(ResponseStatus.FAILURE_CODE, ResponseStatus.NO_RECORDS_FOUND, customerToken,
-						null);
+		if (userPobyteJdbc.validateJwtToken(hotelDetailsRequest.getToken())) {
+		
+			HotelDetailsbyIdResponse hotelDetailsbyIdResponse = new HotelDetailsbyIdResponse();
+		
+		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("GET_HOTEL_DETAILS_BY_ID");
+		sp.registerStoredProcedureParameter("HOTEL_ID", Integer.class, ParameterMode.IN);
+		sp.setParameter("HOTEL_ID", hotelDetailsRequest.getHotelId());
+		boolean exist = sp.execute();
+		if (exist == true) {
+			List<Object[]> resultList = sp.getResultList();
+			System.out.println(resultList.size());
+			for (Object[] result : resultList) {
+			hotelDetailsbyIdResponse.setHotelId(result[0]);
+			hotelDetailsbyIdResponse.setHotelName(result[1]);
+			hotelDetailsbyIdResponse.setHotelDescription(result[2]);
+			hotelDetailsbyIdResponse.setHotelAddress(result[3]);
+			hotelDetailsbyIdResponse.setHotelLocation(result[4]);
+			hotelDetailsbyIdResponse.setHotelCity(result[5]);
+			hotelDetailsbyIdResponse.setHotelState(result[6]);
+			hotelDetailsbyIdResponse.setHotelCountry(result[7]);
+			hotelDetailsbyIdResponse.setPinCode(result[8]);
+			hotelDetailsbyIdResponse.setHotelType(result[9]);
+			hotelDetailsbyIdResponse.setStarRatingByHotel(result[10]);
+			hotelDetailsbyIdResponse.setMaximumOccpency(result[11]);
+			hotelDetailsbyIdResponse.setPricePerMin(result[12]);
+			hotelDetailsbyIdResponse.setMinmumDurationPin(result[13]);
+			hotelDetailsbyIdResponse.setCurrencyType(result[14]);
+			hotelDetailsbyIdResponse.setIsAvailable(result[15]);
+			hotelDetailsbyIdResponse.setAmenities(result[16]);
+			hotelDetailsbyIdResponse.setPhotos(result[17]);
+			hotelDetailsbyIdResponse.setTax(result[18]);
+			
 			}
-		} catch (Exception e) {
+			responseMessage = new Response("0001", null, hotelDetailsRequest.getToken(), hotelDetailsbyIdResponse);
+		}else{
+			responseMessage = new Response("0010", "", hotelDetailsRequest.getToken(),null);
+		}
+			}else{
+				responseMessage = new Response("0011", null, "", "");
+			}
+		
+		}catch (Exception e) {
+		
 			LOGGER.error("An exception occurred while getting the hotels specific details" + e);
 		}
 		return responseMessage;
@@ -92,7 +124,7 @@ public class HotelServices {
 	@RequestMapping(value = "/getHotelsbyLocation", method = RequestMethod.POST, produces = "application/json")
 	public Response getHotels(@RequestBody HotelsbyLocationRequest locationRequest) throws JsonProcessingException, SQLException {
 
-		//if (userPobyteJdbc.validateJwtToken(locationRequest.getJwtToken())) {
+		if (userPobyteJdbc.validateJwtToken(locationRequest.getJwtToken())) {
 			List<HotelsListByRadius> hotelsListByRadiusList = new ArrayList<HotelsListByRadius>();
 			HotelsListByRadius hotelsListByRadius = new HotelsListByRadius();
 			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("GET_HOTELS_BY_RADIUS");
@@ -119,12 +151,15 @@ public class HotelServices {
 					hotelsListByRadius.setHotel_State(result[8]);
 					hotelsListByRadius.setHotel_Country(result[9]);
 					hotelsListByRadius.setPin_Code(result[10]);
-					hotelsListByRadius.setContact_No1(result[11]);
-					hotelsListByRadius.setContact_No2(result[12]);
-					hotelsListByRadius.setContact_No3(result[13]);
-					hotelsListByRadius.setHotel_type(result[14]);
-					hotelsListByRadius.setMaximum_Occupency(result[15]);
-					hotelsListByRadius.setStar_Rating_By_Hotel(result[16]);
+					hotelsListByRadius.setHotel_type(result[11]);
+					hotelsListByRadius.setStar_Rating_By_Hotel(result[12]);
+					hotelsListByRadius.setHotel_pic_path(result[13]);
+					hotelsListByRadius.setMaximum_Occupency(result[14]);
+					hotelsListByRadius.setPricePerMin(result[15]);
+					hotelsListByRadius.setMaintenancePerMin(result[16]);
+					hotelsListByRadius.setMinDuration(result[17]);
+					hotelsListByRadius.setCurrencyType(result[18]);
+					hotelsListByRadius.setIsAviablity(result[19]);	
 					hotelsListByRadiusList.add(hotelsListByRadius);
 				}
 				System.out.println(hotelsListByRadiusList);
@@ -134,11 +169,11 @@ public class HotelServices {
 				responseMessage = new Response("0010",null , locationRequest.getJwtToken(), "");
 			}
 
-		/*} else {
+		} else {
 			responseMessage = new Response("0011", null, "", "");
 
 		}
-*/		return responseMessage;
+		return responseMessage;
 	}
 
 
