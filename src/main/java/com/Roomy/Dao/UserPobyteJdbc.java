@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.Roomy.Request.Domain.ForgetPassword;
 import com.Roomy.Request.Domain.LoginRequest;
 import com.Roomy.Request.Domain.UserRequest;
 import com.Roomy.Response.Domain.UserDetails;
@@ -131,7 +132,7 @@ public class UserPobyteJdbc {
 
 	public Response userRegistration(UserRequest userRequest) throws Exception {
 		try {
-
+			
 			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_REGISTRATION");
 			sp.registerStoredProcedureParameter("EMAIL_ADDRESS", String.class, ParameterMode.IN);
 			sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
@@ -175,7 +176,7 @@ public class UserPobyteJdbc {
 		try {
 
 			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_STATUS");
-			sp.registerStoredProcedureParameter("USERID", int.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("USERID", Integer.class, ParameterMode.IN);
 			sp.setParameter("USERID", userId);
 			boolean exist = sp.execute();
 			if (exist == true) {
@@ -227,16 +228,21 @@ public class UserPobyteJdbc {
 		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("LOGIN_TYPE", String.class, ParameterMode.IN);
 
-		if (userRequest.getLoginType().equals("web")) {
-			if (userRequest.getConactNumber() != null) {
+		if (userRequest.getLoginType().equals("APP") || userRequest.getLoginType().equals("FB") || userRequest.getLoginType().equals("GMAIL")) {
+			if (userRequest.getConactNumber() != null && userRequest.getConactNumber().trim().length() > 0) {
 				sp.setParameter("LOGIN_DETAIL", userRequest.getConactNumber());
 			} else {
 				sp.setParameter("LOGIN_DETAIL", userRequest.getEmailId());
 			}
-			sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPassword()));
+			if (userRequest.getLoginType().equals("APP")){
+				sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPassword()));	
+			}else{
+				sp.setParameter("LOGIN_PASSWORD","");
+			}
+			
 		}
 
-		if (userRequest.getLoginType().equals("token")) {
+		if (userRequest.getLoginType().equals("TOKEN")) {
 
 			sp.setParameter("LOGIN_DETAIL", userRequest.getToken());
 			sp.setParameter("LOGIN_PASSWORD", "");
@@ -246,35 +252,40 @@ public class UserPobyteJdbc {
 		boolean exist = sp.execute();
 		if (exist == true) {
 			List<Object[]> resultList = sp.getResultList();
+			if (resultList.size() > 0 && resultList.contains("USERISNOTFOUND")) {
+				responseMessage = new Response("0013", null); // User is not Exist 
+			}			
+			
 			if (resultList.size() > 0 && resultList.contains("Failure:WrongCredentials")) {
 				responseMessage = new Response("0005", null); // Invalid Username or password
 
-			} else if (resultList.size() > 0 && resultList.contains("Failure:InactiveOrSuspendedUser")) {
+			}
+			if (resultList.size() > 0 && resultList.contains("Failure:InactiveOrSuspendedUser")) {
 				responseMessage = new Response("0006", null);// Inactive or suspended User
-			} else {
-
+			} 
+			if(resultList.size() > 0)
+			{
 				for (Object[] result : resultList) {
 					userDetails = new UserDetails();
-					userDetails.setResponse(result[0]);
-					userDetails.setUserID(result[1]);
-					userDetails.setContactNumber(result[2]);
-					userDetails.setEmailAddress(result[3]);
-					userDetails.setFirst_Name(result[4]);
-					userDetails.setMidle_Name(result[5]);
-					userDetails.setLast_Name(result[6]);
-					userDetails.setUser_type(result[7]);
-					userDetails.setMemberShip_type(result[8]);
-					userDetails.setIdentityCardType(result[9]);
-					userDetails.setIdentityCardNumber(result[10]);
-					userDetails.setCompanyName(result[11]);
-					userDetails.setEmergencyContactNumber1(result[12]);
-					userDetails.setEmergencyContactNumber2(result[13]);
-					userDetails.setDateOfBirth(result[14]);
-					userDetails.setCityPrefrence(result[15]);
-					userDetails.setSmsNotificationPrefrences(result[16]);
-					userDetails.setEmailNotificationPrefrences(result[17]);
-					userDetails.setUserStatus(result[18]);
-					userDetails.setUserTokenValue(result[19]);
+					userDetails.setUserID(result[0]);
+					userDetails.setContactNumber(result[1]);
+					userDetails.setEmailAddress(result[2]);
+					userDetails.setFirst_Name(result[3]);
+					userDetails.setMidle_Name(result[4]);
+					userDetails.setLast_Name(result[5]);
+					userDetails.setUser_type(result[6]);
+					userDetails.setMemberShip_type(result[7]);
+					userDetails.setIdentityCardType(result[8]);
+					userDetails.setIdentityCardNumber(result[9]);
+					userDetails.setCompanyName(result[10]);
+					userDetails.setEmergencyContactNumber1(result[11]);
+					userDetails.setEmergencyContactNumber2(result[12]);
+					userDetails.setDateOfBirth(result[13]);
+					userDetails.setCityPrefrence(result[14]);
+					userDetails.setSmsNotificationPrefrences(result[15]);
+					userDetails.setEmailNotificationPrefrences(result[16]);
+					userDetails.setUserStatus(result[17]);
+					userDetails.setUserTokenValue(result[18]);
 
 					response.add(userDetails);
 					responseMessage = new Response("0001", userDetails);
@@ -287,44 +298,86 @@ public class UserPobyteJdbc {
 		return responseMessage;
 	}
 
-	public UserDetails getUserprofileById(int userId) {
+	public UserDetails getUserprofileById(UserRequest userRequest) {
 		UserDetails userDetails = null;
 		List<Object> response = new ArrayList<>();
 		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("GET_USER_PROFILE_BY_ID");
 		sp.registerStoredProcedureParameter("USER_ID", Integer.class, ParameterMode.IN);
-		sp.setParameter("USER_ID", userId);
+		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
+		if(userRequest.getUserId() > 0){
+			sp.setParameter("USER_ID", userRequest.getUserId());
+			sp.setParameter("LOGIN_DETAIL", "");
+		}else{
+			if (userRequest.getConactNumber() != null && userRequest.getConactNumber().trim().length() > 0) {
+				sp.setParameter("LOGIN_DETAIL", userRequest.getConactNumber());
+			} else {
+				sp.setParameter("LOGIN_DETAIL", userRequest.getEmailId());
+			}
+			sp.setParameter("USER_ID", 0);
+		}
 
+		
 		boolean exist = sp.execute();
 		if (exist == true) {
 			List<Object[]> resultList = sp.getResultList();
 			for (Object[] result : resultList) {
 				userDetails = new UserDetails();
-				userDetails.setResponse(result[0]);
-				userDetails.setUserID(result[1]);
-				userDetails.setContactNumber(result[2]);
-				userDetails.setEmailAddress(result[3]);
-				userDetails.setFirst_Name(result[4]);
-				userDetails.setMidle_Name(result[5]);
-				userDetails.setLast_Name(result[6]);
-				userDetails.setUser_type(result[7]);
-				userDetails.setMemberShip_type(result[8]);
-				userDetails.setIdentityCardType(result[9]);
-				userDetails.setIdentityCardNumber(result[10]);
-				userDetails.setCompanyName(result[11]);
-				userDetails.setEmergencyContactNumber1(result[12]);
-				userDetails.setEmergencyContactNumber2(result[13]);
-				userDetails.setDateOfBirth(result[14]);
-				userDetails.setCityPrefrence(result[15]);
-				userDetails.setSmsNotificationPrefrences(result[16]);
-				userDetails.setEmailNotificationPrefrences(result[17]);
-				userDetails.setUserStatus(result[18]);
-				userDetails.setUserTokenValue(result[19]);
+				userDetails.setUserID(result[0]);
+				userDetails.setContactNumber(result[1]);
+				userDetails.setEmailAddress(result[2]);
+				userDetails.setFirst_Name(result[3]);
+				userDetails.setMidle_Name(result[4]);
+				userDetails.setLast_Name(result[5]);
+				userDetails.setUser_type(result[6]);
+				userDetails.setMemberShip_type(result[7]);
+				userDetails.setIdentityCardType(result[8]);
+				userDetails.setIdentityCardNumber(result[9]);
+				userDetails.setCompanyName(result[10]);
+				userDetails.setEmergencyContactNumber1(result[11]);
+				userDetails.setEmergencyContactNumber2(result[12]);
+				userDetails.setDateOfBirth(result[13]);
+				userDetails.setCityPrefrence(result[14]);
+				userDetails.setSmsNotificationPrefrences(result[15]);
+				userDetails.setEmailNotificationPrefrences(result[16]);
+				userDetails.setUserStatus(result[17]);
+				userDetails.setUserTokenValue(result[18]);
 
 				response.add(userDetails);
 
 			}
 		}
 		return userDetails;
+	}
+	
+	public Response forgetPassword(ForgetPassword forgetPassword)
+			 {
+try{
+		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_PASSWORD");
+		sp.registerStoredProcedureParameter("PASSWORD", String.class, ParameterMode.IN);
+		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
+		
+		if (forgetPassword.getMobilenNumber() !=null && forgetPassword.getMobilenNumber().trim().length() > 0) {
+			sp.setParameter("LOGIN_DETAIL", forgetPassword.getMobilenNumber());
+		} else {
+			sp.setParameter("LOGIN_DETAIL", forgetPassword.getEmailId());
+		}
+		sp.setParameter("PASSWORD", aESEncryptionUtil.encrypt(forgetPassword.getPassword()));
+		
+		boolean result = sp.execute();
+		if (result == true) {
+			List<Object[]> resultList = sp.getResultList();
+			if (resultList.size() > 0 && resultList.contains("Success")) {
+				responseMessage = new Response("0001", null);// Successfully updated
+			} else {
+				responseMessage = new Response("0012", null);// User ID Is not exist
+			}
+			
+				}
+}catch(Exception e){
+	LOGGER.info("FORget password  exception",e);
+	
+}
+		return responseMessage;
 	}
 
 }

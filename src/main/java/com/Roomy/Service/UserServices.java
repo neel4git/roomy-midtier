@@ -5,7 +5,6 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -21,9 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Roomy.Dao.UserPobyteJdbc;
-import com.Roomy.Request.Domain.HotelsbyLocationRequest;
+import com.Roomy.Request.Domain.ForgetPassword;
 import com.Roomy.Request.Domain.UserRequest;
-import com.Roomy.Response.Domain.HotelsListByRadius;
 import com.Roomy.Response.Domain.UserDetails;
 import com.Roomy.Util.AESEncryptionUtil;
 import com.Roomy.Util.JwtKeyUtil;
@@ -54,55 +52,13 @@ public class UserServices {
 	@RequestMapping(value = "/userRegistration", method = RequestMethod.POST, produces = "application/json")
 	public Response userRegisterAndAuth(@RequestBody UserRequest userRequest) throws Exception {
 		try{
-		// Register module
+			
 			int OTPAuth = RoomyUtil.generateOTP();
-		if(userRequest.getAction().equals("signup") || userRequest.getAction().equals("fbm")
-				|| userRequest.getAction().equals("gm") || userRequest.getAction().equals("fb")
-				|| userRequest.getAction().equals("ga")){
-		responseMessage = userPobyteJdbc.userRegistration(userRequest);
-		if(responseMessage.getStatus().equals("0001")){
-			
-			int userId = (int)responseMessage.getResult();
-			userRequest.setUserId(userId);
-			
-			if( userRequest.getAction().equals("fb") || userRequest.getAction().equals("ga")){
-				responseMessage = new Response("0001", null, generateCustomerToken(userRequest, OTPAuth),userPobyteJdbc.getUserprofileById(userId));
-			}else{
-				responseMessage = new Response("0009", null, generateCustomerToken(userRequest, OTPAuth),OTPAuth);	
-			}
-			
-		}else{
-			if(responseMessage.getStatusMessage().equals("0002")){
-				responseMessage = new Response(0002, null, null,null);
-			}else{
-				if(responseMessage.getStatus().equals("0003")){
-					responseMessage = new Response(0003, null, null,null);
-				}
-			}
-		}
-		}
-		//OTP module
-			if(userRequest.getAction().equals("otp")){
-				SourceKeyRing sourceKeyRing = decryptyToken(userRequest.getToken());
-				// if otp didnot matched
-				if (userRequest.getOtp().equals(sourceKeyRing.getOtp())) {
-					responseMessage = new Response("0007", null,userRequest.getToken(), null);
-				}
-				// if OTP issued time is excceded greater than 15 minutes
-				else if (RoomyUtil.getOtpIssueTimeDiffrence(sourceKeyRing.getOtpIssuedTime()) > 15) {
-					responseMessage = new Response("0008", null,userRequest.getToken(), null);
-				}else{
-					responseMessage =userPobyteJdbc.updateuserStatus(userRequest.getUserId());
-					if(responseMessage.getStatus().equals("0001")){
-						responseMessage = new Response("0001", null,userRequest.getToken(), userPobyteJdbc.getUserprofileById(userRequest.getUserId()));
-					}
-				}
-			}
-		//Sign in Module
-			if(userRequest.getAction().equals("signin")){
+			//Sign in Module
+			if(userRequest.getAction().equals("SIGNIN")){
 				responseMessage = userPobyteJdbc.userLogin(userRequest);
 			if(responseMessage.getStatus().equals("0001")){
-				if(userRequest.getLoginType().equals("web")){
+				if(userRequest.getLoginType().equals("APP") || userRequest.getLoginType().equals("FB") || userRequest.getLoginType().equals("GMAIL")){
 				Object result =  responseMessage.getResult();
 				String token = generateCustomerToken(userRequest, OTPAuth);
 				if (userRequest.getConactNumber() != null) {
@@ -119,6 +75,62 @@ public class UserServices {
 				responseMessage = new Response(responseMessage.getStatus(), null,null, null);
 			}
 			}
+			
+			
+			
+		// Register module
+			
+		if(userRequest.getAction().equals("SIGNUP")){
+		responseMessage = userPobyteJdbc.userRegistration(userRequest);
+		if(responseMessage.getStatus().equals("0001")){
+			
+			int userId = (int)responseMessage.getResult();
+			userRequest.setUserId(userId);
+			userRequest.setOtp(OTPAuth);
+			
+				responseMessage = new Response("0009", null, generateCustomerToken(userRequest, OTPAuth),userRequest);	
+			
+			
+		}else{
+			if(responseMessage.getStatusMessage().equals("0002")){
+				responseMessage = new Response(0002, null, null,null);
+			}else{
+				if(responseMessage.getStatus().equals("0003")){
+					responseMessage = new Response(0003, null, null,null);
+				}
+			}
+		}
+		}
+		//OTP module
+			if(userRequest.getAction().equals("OTP")){
+				SourceKeyRing sourceKeyRing = decryptyToken(userRequest.getToken());
+				// if otp didnot matched
+				if (userRequest.getOtp() != sourceKeyRing.getOtp()) {
+					responseMessage = new Response("0007", null,userRequest.getToken(), null);
+				}
+				// if OTP issued time is excceded greater than 15 minutes
+				else if (RoomyUtil.getOtpIssueTimeDiffrence(sourceKeyRing.getOtpIssuedTime()) > 15) {
+					responseMessage = new Response("0008", null,userRequest.getToken(), null);
+				}else{
+					responseMessage =userPobyteJdbc.updateuserStatus(userRequest.getUserId());
+					if(responseMessage.getStatus().equals("0001")){
+						responseMessage = new Response("0001", null,userRequest.getToken(), userPobyteJdbc.getUserprofileById(userRequest));
+					}
+				}
+			}
+			if(userRequest.getAction().equals("RESENDOTP")){
+				String token = generateCustomerToken(userRequest, OTPAuth);
+				if (userRequest.getConactNumber() != null && userRequest.getConactNumber().trim().length()>0) {
+					userPobyteJdbc.updateToken(userRequest.getConactNumber(), token);	
+				} else {
+					userPobyteJdbc.updateToken(userRequest.getEmailId(), token);
+				}
+				UserDetails userDetails = userPobyteJdbc.getUserprofileById(userRequest);
+				userRequest.setUserId((int) userDetails.getUserID());
+				userRequest.setOtp(OTPAuth);
+				responseMessage = new Response("0009", null, generateCustomerToken(userRequest, OTPAuth),userRequest);
+			}
+		
 		}catch(Exception e){
 			return responseMessage = new Response("0011", null,null, null);
 		}
@@ -159,7 +171,7 @@ public class UserServices {
 		return responseMessage;
 	}
 
-	@RequestMapping(value = "/getHotelsbyLocation", method = RequestMethod.POST, produces = "application/json")
+	/*@RequestMapping(value = "/getHotelsbyLocation", method = RequestMethod.POST, produces = "application/json")
 	public Response getHotels(@RequestBody HotelsbyLocationRequest locationRequest) throws JsonProcessingException, SQLException {
 
 		if (userPobyteJdbc.validateJwtToken(locationRequest.getJwtToken())) {
@@ -210,7 +222,7 @@ public class UserServices {
 		}
 		return responseMessage;
 	}
-
+*/
 	@RequestMapping(value = "/updateUserProfile", method = RequestMethod.POST, produces = "application/json")
 	public Response updateUserProfile(@RequestBody UserDetails useRDetails,
 			@RequestParam(value = "jwtToken") String jwtToken) throws JsonProcessingException, SQLException {
@@ -272,6 +284,23 @@ public class UserServices {
 
 		return responseMessage;
 	}
+	
+	@RequestMapping(value = "/forgetPassword", method = RequestMethod.POST, produces = "application/json")
+	public Response forgetPassword(@RequestBody ForgetPassword forgetPassword)
+			throws JsonProcessingException, SQLException {
+
+		try{
+			responseMessage = 	userPobyteJdbc.forgetPassword(forgetPassword);
+			
+		}catch(Exception e ){
+			System.out.printf("Exception in FORGETPASSWORD",e);
+			
+		}
+		return responseMessage;
+	}
+	
+	
+	
 
 	public boolean validateJwtToken(String jwtToken) throws JsonProcessingException, SQLException {
 

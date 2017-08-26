@@ -13,7 +13,7 @@ public class UserRequest implements Serializable {
 	String token;
 	String action;
 	String gender;
-	String otp;
+	int otp;
 	String loginType;
 	public int getUserId() {
 		return userId;
@@ -69,10 +69,11 @@ public class UserRequest implements Serializable {
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
-	public String getOtp() {
+	
+	public int getOtp() {
 		return otp;
 	}
-	public void setOtp(String otp) {
+	public void setOtp(int otp) {
 		this.otp = otp;
 	}
 	public String getLoginType() {

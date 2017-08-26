@@ -13,6 +13,8 @@ public class PoByteStatusCodes {
 	public String pb_0009="Please verify with OTP";
 	public String pb_0010="No Records found!";
 	public String pb_0011 = "Invalid JWTToken";
+	public String pb_0012 = "Unable to update user password";
+	public String pb_0013 = "User is not Found";
 	
 	
 
