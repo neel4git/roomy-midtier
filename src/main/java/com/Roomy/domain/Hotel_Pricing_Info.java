@@ -22,7 +22,8 @@ public class Hotel_Pricing_Info {
 	@Column(name = "HOTEL_ID")
 	private int hotelID;
 
-	@Column(name = "AVAILABLE_DATE")
+	//@Column(name = "AVAILABLE_DATE")
+	@Transient
 	private Date availableDate;
 
 	@Column(name = "PRICE_PER_MINUTE")
