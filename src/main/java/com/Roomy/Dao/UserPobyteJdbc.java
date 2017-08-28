@@ -267,25 +267,26 @@ public class UserPobyteJdbc {
 			{
 				for (Object[] result : resultList) {
 					userDetails = new UserDetails();
-					userDetails.setUserID(result[0]);
-					userDetails.setContactNumber(result[1]);
-					userDetails.setEmailAddress(result[2]);
-					userDetails.setFirst_Name(result[3]);
-					userDetails.setMidle_Name(result[4]);
-					userDetails.setLast_Name(result[5]);
-					userDetails.setUser_type(result[6]);
-					userDetails.setMemberShip_type(result[7]);
-					userDetails.setIdentityCardType(result[8]);
-					userDetails.setIdentityCardNumber(result[9]);
-					userDetails.setCompanyName(result[10]);
-					userDetails.setEmergencyContactNumber1(result[11]);
-					userDetails.setEmergencyContactNumber2(result[12]);
-					userDetails.setDateOfBirth(result[13]);
-					userDetails.setCityPrefrence(result[14]);
-					userDetails.setSmsNotificationPrefrences(result[15]);
-					userDetails.setEmailNotificationPrefrences(result[16]);
-					userDetails.setUserStatus(result[17]);
-					userDetails.setUserTokenValue(result[18]);
+					userDetails.setResponse(result[0]);
+					userDetails.setUserID(result[1]);
+					userDetails.setContactNumber(result[2]);
+					userDetails.setEmailAddress(result[3]);
+					userDetails.setFirst_Name(result[4]);
+					userDetails.setMidle_Name(result[5]);
+					userDetails.setLast_Name(result[6]);
+					userDetails.setUser_type(result[7]);
+					userDetails.setMemberShip_type(result[8]);
+					userDetails.setIdentityCardType(result[9]);
+					userDetails.setIdentityCardNumber(result[10]);
+					userDetails.setCompanyName(result[11]);
+					userDetails.setEmergencyContactNumber1(result[12]);
+					userDetails.setEmergencyContactNumber2(result[13]);
+					userDetails.setDateOfBirth(result[14]);
+					userDetails.setCityPrefrence(result[15]);
+					userDetails.setSmsNotificationPrefrences(result[16]);
+					userDetails.setEmailNotificationPrefrences(result[17]);
+					userDetails.setUserStatus(result[18]);
+					userDetails.setUserTokenValue(result[19]);
 
 					response.add(userDetails);
 					responseMessage = new Response("0001", userDetails);
