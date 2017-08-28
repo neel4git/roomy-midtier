@@ -132,6 +132,8 @@ public class UserServices {
 			}
 		
 		}catch(Exception e){
+			System.out.println("In Userservice Entered into Catch Block");
+			System.out.println(e);
 			return responseMessage = new Response("0011", null,null, null);
 		}
 		return responseMessage;
