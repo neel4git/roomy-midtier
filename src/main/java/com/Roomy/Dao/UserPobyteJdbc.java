@@ -222,6 +222,12 @@ public class UserPobyteJdbc {
 
 		UserDetails userDetails = null;
 		List<Object> response = new ArrayList<>();
+		
+		System.out.println("username"+ userRequest.getConactNumber());
+		System.out.println("General Password"+ userRequest.getPassword());
+		System.out.println("Encripted Password"+ aESEncryptionUtil.encrypt(userRequest.getPassword()));
+		System.out.println("Login Type"+userRequest.getLoginType());
+		
 		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_LOGIN");
 		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
