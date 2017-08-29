@@ -253,15 +253,15 @@ public class UserPobyteJdbc {
 		if (exist == true) {
 			List<Object[]> resultList = sp.getResultList();
 			if (resultList.size() > 0 && resultList.contains("USERISNOTFOUND")) {
-				responseMessage = new Response("0013", null); // User is not Exist
+				return responseMessage = new Response("0013", null); // User is not Exist
 			}
 
 			if (resultList.size() > 0 && resultList.contains("Failure:WrongCredentials")) {
-				responseMessage = new Response("0005", null); // Invalid Username or password
+				return responseMessage = new Response("0005", null); // Invalid Username or password
 
 			}
 			if (resultList.size() > 0 && resultList.contains("Failure:InactiveOrSuspendedUser")) {
-				responseMessage = new Response("0006", null);// Inactive or suspended User
+				return responseMessage = new Response("0006", null);// Inactive or suspended User
 			}
 			if (resultList.size() > 0) {
 				for (Object[] result : resultList) {
@@ -288,7 +288,7 @@ public class UserPobyteJdbc {
 					userDetails.setUserTokenValue(result[19]);
 
 					response.add(userDetails);
-					responseMessage = new Response("0001", userDetails);
+					return responseMessage = new Response("0001", userDetails);
 				}
 
 			}
