@@ -1,35 +1,12 @@
 package com.Roomy.Service;
 
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Roomy.Repository.UserRepository;
-import com.Roomy.Request.Domain.AutheticateUserRequest;
-import com.Roomy.Request.Domain.LoginRequest;
-import com.Roomy.Request.Domain.UserRegistrationRequest;
-import com.Roomy.Response.Domain.LoginResponse;
 import com.Roomy.Util.AESEncryptionUtil;
-import com.Roomy.Util.JwtKeyUtil;
-import com.Roomy.Util.RoomyUtil;
 import com.Roomy.domain.Response;
-import com.Roomy.domain.ResponseStatus;
-import com.Roomy.domain.SourceKeyRing;
-import com.Roomy.domain.UserMaster;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jwt.JWTClaimsSet;
 
 @RestController
 public class UserRegistrationService {

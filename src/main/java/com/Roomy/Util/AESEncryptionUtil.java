@@ -3,18 +3,13 @@ package com.Roomy.Util;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.stereotype.Component;
-
-import com.Roomy.Application;
 
 @Component
 public class AESEncryptionUtil {

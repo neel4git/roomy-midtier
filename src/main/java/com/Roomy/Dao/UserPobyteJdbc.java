@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.Roomy.Request.Domain.ForgetPassword;
 import com.Roomy.Request.Domain.LoginRequest;
 import com.Roomy.Request.Domain.UserRequest;
+import com.Roomy.Response.Domain.HotelDetails;
 import com.Roomy.Response.Domain.UserDetails;
 import com.Roomy.Util.AESEncryptionUtil;
 import com.Roomy.domain.Response;
@@ -132,7 +133,7 @@ public class UserPobyteJdbc {
 
 	public Response userRegistration(UserRequest userRequest) throws Exception {
 		try {
-			
+
 			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("USER_REGISTRATION");
 			sp.registerStoredProcedureParameter("EMAIL_ADDRESS", String.class, ParameterMode.IN);
 			sp.registerStoredProcedureParameter("CONTACT_NUMBER", String.class, ParameterMode.IN);
@@ -192,9 +193,8 @@ public class UserPobyteJdbc {
 		}
 		return responseMessage;
 	}
-	
 
-	public Response updateToken(String result,String token) {
+	public Response updateToken(String result, String token) {
 		try {
 
 			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_TOKEN");
@@ -202,7 +202,7 @@ public class UserPobyteJdbc {
 			sp.registerStoredProcedureParameter("TOKEN", String.class, ParameterMode.IN);
 			sp.setParameter("LOGIN_DETAIL", result);
 			sp.setParameter("TOKEN", token);
-			
+
 			boolean exist = sp.execute();
 			if (exist == true) {
 				List<Object[]> resultList = sp.getResultList();
@@ -218,7 +218,6 @@ public class UserPobyteJdbc {
 		return responseMessage;
 	}
 
-	
 	public Response userLogin(UserRequest userRequest) throws Exception {
 
 		UserDetails userDetails = null;
@@ -228,18 +227,19 @@ public class UserPobyteJdbc {
 		sp.registerStoredProcedureParameter("LOGIN_PASSWORD", String.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("LOGIN_TYPE", String.class, ParameterMode.IN);
 
-		if (userRequest.getLoginType().equals("APP") || userRequest.getLoginType().equals("FB") || userRequest.getLoginType().equals("GMAIL")) {
+		if (userRequest.getLoginType().equals("APP") || userRequest.getLoginType().equals("FB")
+				|| userRequest.getLoginType().equals("GMAIL")) {
 			if (userRequest.getConactNumber() != null && userRequest.getConactNumber().trim().length() > 0) {
 				sp.setParameter("LOGIN_DETAIL", userRequest.getConactNumber());
 			} else {
 				sp.setParameter("LOGIN_DETAIL", userRequest.getEmailId());
 			}
-			if (userRequest.getLoginType().equals("APP")){
-				sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPassword()));	
-			}else{
-				sp.setParameter("LOGIN_PASSWORD","");
+			if (userRequest.getLoginType().equals("APP")) {
+				sp.setParameter("LOGIN_PASSWORD", aESEncryptionUtil.encrypt(userRequest.getPassword()));
+			} else {
+				sp.setParameter("LOGIN_PASSWORD", "");
 			}
-			
+
 		}
 
 		if (userRequest.getLoginType().equals("TOKEN")) {
@@ -253,18 +253,17 @@ public class UserPobyteJdbc {
 		if (exist == true) {
 			List<Object[]> resultList = sp.getResultList();
 			if (resultList.size() > 0 && resultList.contains("USERISNOTFOUND")) {
-				responseMessage = new Response("0013", null); // User is not Exist 
-			}			
-			
+				responseMessage = new Response("0013", null); // User is not Exist
+			}
+
 			if (resultList.size() > 0 && resultList.contains("Failure:WrongCredentials")) {
 				responseMessage = new Response("0005", null); // Invalid Username or password
 
 			}
 			if (resultList.size() > 0 && resultList.contains("Failure:InactiveOrSuspendedUser")) {
 				responseMessage = new Response("0006", null);// Inactive or suspended User
-			} 
-			if(resultList.size() > 0)
-			{
+			}
+			if (resultList.size() > 0) {
 				for (Object[] result : resultList) {
 					userDetails = new UserDetails();
 					userDetails.setResponse(result[0]);
@@ -305,10 +304,10 @@ public class UserPobyteJdbc {
 		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("GET_USER_PROFILE_BY_ID");
 		sp.registerStoredProcedureParameter("USER_ID", Integer.class, ParameterMode.IN);
 		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
-		if(userRequest.getUserId() > 0){
+		if (userRequest.getUserId() > 0) {
 			sp.setParameter("USER_ID", userRequest.getUserId());
 			sp.setParameter("LOGIN_DETAIL", "");
-		}else{
+		} else {
 			if (userRequest.getConactNumber() != null && userRequest.getConactNumber().trim().length() > 0) {
 				sp.setParameter("LOGIN_DETAIL", userRequest.getConactNumber());
 			} else {
@@ -317,7 +316,6 @@ public class UserPobyteJdbc {
 			sp.setParameter("USER_ID", 0);
 		}
 
-		
 		boolean exist = sp.execute();
 		if (exist == true) {
 			List<Object[]> resultList = sp.getResultList();
@@ -349,35 +347,86 @@ public class UserPobyteJdbc {
 		}
 		return userDetails;
 	}
-	
-	public Response forgetPassword(ForgetPassword forgetPassword)
-			 {
-try{
-		StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_PASSWORD");
-		sp.registerStoredProcedureParameter("PASSWORD", String.class, ParameterMode.IN);
-		sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
-		
-		if (forgetPassword.getMobilenNumber() !=null && forgetPassword.getMobilenNumber().trim().length() > 0) {
-			sp.setParameter("LOGIN_DETAIL", forgetPassword.getMobilenNumber());
-		} else {
-			sp.setParameter("LOGIN_DETAIL", forgetPassword.getEmailId());
-		}
-		sp.setParameter("PASSWORD", aESEncryptionUtil.encrypt(forgetPassword.getPassword()));
-		
-		boolean result = sp.execute();
-		if (result == true) {
-			List<Object[]> resultList = sp.getResultList();
-			if (resultList.size() > 0 && resultList.contains("Success")) {
-				responseMessage = new Response("0001", null);// Successfully updated
+
+	public Response forgetPassword(ForgetPassword forgetPassword) {
+		try {
+			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_USER_PASSWORD");
+			sp.registerStoredProcedureParameter("PASSWORD", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("LOGIN_DETAIL", String.class, ParameterMode.IN);
+
+			if (forgetPassword.getMobilenNumber() != null && forgetPassword.getMobilenNumber().trim().length() > 0) {
+				sp.setParameter("LOGIN_DETAIL", forgetPassword.getMobilenNumber());
 			} else {
-				responseMessage = new Response("0012", null);// User ID Is not exist
+				sp.setParameter("LOGIN_DETAIL", forgetPassword.getEmailId());
 			}
-			
+			sp.setParameter("PASSWORD", aESEncryptionUtil.encrypt(forgetPassword.getPassword()));
+
+			boolean result = sp.execute();
+			if (result == true) {
+				List<Object[]> resultList = sp.getResultList();
+				if (resultList.size() > 0 && resultList.contains("Success")) {
+					responseMessage = new Response("0001", null);// Successfully updated
+				} else {
+					responseMessage = new Response("0012", null);// User ID Is not exist
 				}
-}catch(Exception e){
-	LOGGER.info("FORget password  exception",e);
-	
-}
+
+			}
+		} catch (Exception e) {
+			LOGGER.error("FORget password  exception", e);
+
+		}
+		return responseMessage;
+	}
+
+	public Response updateHotelDetails(HotelDetails hotelDetails) {
+		LOGGER.info("Entered into updateHotelDetails to update the hotel details in the dashboard");
+		try {
+			StoredProcedureQuery sp = entityManager.createStoredProcedureQuery("UPDATE_HOTEL_DETAILS");
+			sp.registerStoredProcedureParameter("HOTEL_NAME", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("HOTEL_DESCRIPTION", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("STAR_RATING_BY_HOTEL", Integer.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("HOTEL_ADDRESS", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("HOTEL_LOCATION	", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("HOTEL_CITY	", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("HOTEL_STATE", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("HOTEL_COUNTRY", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("PIN_CODE", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("WEBSITE", String.class, ParameterMode.IN);
+			sp.registerStoredProcedureParameter("CONTACT_NUMBER_1", String.class, ParameterMode.IN);
+
+			/*
+			 * Seeting the value to parameters
+			 */
+			LOGGER.info("Entered into updateHotelDetails to update the hotel details in the dashboard");
+			sp.setParameter("HOTEL_NAME", hotelDetails.getHotelName());
+			sp.setParameter("HOTEL_DESCRIPTION", hotelDetails.getHotelDescription());
+			sp.setParameter("STAR_RATING_BY_HOTEL", Integer.parseInt(hotelDetails.getStars()));
+			sp.setParameter("HOTEL_ADDRESS", hotelDetails.getRatePerMin());
+			sp.setParameter("HOTEL_LOCATION", "");
+			sp.setParameter("HOTEL_CITY", hotelDetails.getAddress().get("city"));
+			sp.setParameter("HOTEL_STATE", hotelDetails.getAddress().get("state"));
+			sp.setParameter("HOTEL_COUNTRY", "");
+			sp.setParameter("PIN_CODE", hotelDetails.getAddress().get("pin"));
+			sp.setParameter("WEBSITE", hotelDetails.getWebsite());
+			sp.setParameter("CONTACT_NUMBER_1", hotelDetails.getPhone());
+
+			boolean result = sp.execute();
+			if (result == true) {
+				List<Object[]> resultList = sp.getResultList();
+				if (resultList.size() > 0 && resultList.contains("Success")) {
+					responseMessage = new Response(ResponseStatus.SUCCESS_CODE, "Hotel Details Updated Sucesfully", "",
+							null);// Successfully updated
+				} else {
+					responseMessage = new Response(ResponseStatus.FAILURE_CODE,
+							"something went wrong in updating the hotel details", "", null);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.info("exception occurred while updating the hotel details", e);
+			responseMessage = new Response(ResponseStatus.FAILURE_CODE,
+					"Exception occurred while updating the hotel details", "", null);// Successfully updated
+
+		}
 		return responseMessage;
 	}
 

@@ -5,11 +5,13 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.Roomy.Dao.UserPobyteJdbc;
 import com.Roomy.Repository.Hotel_MasterRepository;
 import com.Roomy.Response.Domain.HotelDetails;
 import com.Roomy.Service.Conversions.ResponseBuilder;
@@ -28,6 +30,8 @@ public class DashBoardHotelDetailsService {
 	Hotel_MasterRepository hotel_MasterRepository;
 	@Autowired
 	ResponseBuilder responseBuilder;
+	@Autowired
+	UserPobyteJdbc userPobyteJdbc;
 	private Response hotelDetailsResponse;
 
 	@RequestMapping(value = "/getDashBoardHotelDetails", method = RequestMethod.POST, produces = "application/json")
@@ -53,5 +57,17 @@ public class DashBoardHotelDetailsService {
 					ResponseStatus.DASHBOARD_HOTEL_DETAILS_EXCEPTION, customerToken, hotelDetails);
 		}
 		return hotelDetailsResponse;
+	}
+
+	@RequestMapping(value = "/UpdateDashBoardHotelDetails", method = RequestMethod.POST, produces = "application/json")
+	public Object updateHotelDetails(@RequestBody HotelDetails hotelDetails) {
+		Response updatedHotelDetailsResponse = null;
+		try {
+			updatedHotelDetailsResponse = userPobyteJdbc.updateHotelDetails(hotelDetails);
+		} catch (Exception e) {
+			LOGGER.error("An exception occurred while getting the hotels list" + e);
+			updatedHotelDetailsResponse = new Response(ResponseStatus.FAILURE_CODE,	"Oops Something went wrong in Updating the HotelDetails", null, null);
+		}
+		return updatedHotelDetailsResponse;
 	}
 }
